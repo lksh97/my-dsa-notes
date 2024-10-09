@@ -826,4 +826,551 @@ No cycles are found, and we can finish all the courses.
 
 Thus, the overall space complexity is **O(V + E)**.
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+### Another approach -
+
+### Problem: Course Schedule (with Kahn's Algorithm and Topological Sort)
+
+You are given `numCourses` and a list of `prerequisites` where each pair `[a, b]` means you must complete course `b` before taking course `a`. Your task is to determine if it is possible to finish all courses without violating the prerequisites.
+
+This is a classic **graph cycle detection** problem, and it can be solved using **Topological Sort** through **Kahn's Algorithm**.
+
+### Key Graph Concepts
+
+1. **Nodes**: Each course is a node.
+2. **Edges**: Each prerequisite (like `[a, b]`) is a directed edge from `b` to `a`, indicating that `b` must be completed before `a`.
+
+#### Directed Acyclic Graph (DAG)
+- If there is a **cycle** in the graph, it is impossible to complete the courses because some courses would be dependent on each other in a circular way.
+- We solve this by performing **topological sort**, where we try to order the nodes (courses) such that all edges go from left to right, respecting dependencies.
+
+### Topological Sort Using **Kahn's Algorithm**
+
+Kahn's Algorithm is a **BFS**-based approach to topological sorting. We keep track of the **in-degree** (number of incoming edges) of each node. The main idea is:
+- Start with nodes that have **no prerequisites** (in-degree 0).
+- Remove these nodes from the graph and update the in-degree of their neighbors.
+- Repeat this process until no nodes with in-degree 0 remain.
+
+If we have processed all nodes, there is no cycle. If some nodes remain unprocessed, it indicates the presence of a cycle.
+
+---
+
+### Kahn's Algorithm Breakdown (with Text Diagram)
+
+Consider an example with 4 courses and the following prerequisites:
+
+```
+numCourses = 4
+prerequisites = [[1, 0], [2, 1], [3, 2]]
+```
+
+#### Graph Representation
+
+- Course 1 depends on course 0: `0 → 1`
+- Course 2 depends on course 1: `1 → 2`
+- Course 3 depends on course 2: `2 → 3`
+
+The graph looks like this:
+
+```
+0 → 1 → 2 → 3
+```
+
+#### Steps:
+
+1. **Build the Graph**:
+    - First, we create an **adjacency list** to represent the graph.
+    - Then, we create an **in-degree array** to count the incoming edges for each course.
+   
+   After processing the prerequisites, we have:
+   - **Adjacency List**: 
+     ```
+     0 → [1]
+     1 → [2]
+     2 → [3]
+     ```
+   - **In-degree array**: 
+     ```
+     [0, 1, 1, 1]
+     ```
+
+   This means course 0 has no prerequisites, course 1 has 1 prerequisite (course 0), and so on.
+
+2. **Initialize the Queue**:
+   - We start with courses that have an in-degree of 0, which means they have no prerequisites.
+   - In this case, only course 0 has in-degree 0, so we add it to the queue:
+     ```
+     Queue = [0]
+     ```
+
+3. **Process the Queue**:
+   - Dequeue course 0 (the first element of the queue) and process it.
+   - After processing, we remove the edge `0 → 1`, so we decrement the in-degree of course 1 by 1:
+     ```
+     In-degree array: [0, 0, 1, 1]
+     Queue = [1]
+     ```
+
+   - Now process course 1. Remove the edge `1 → 2` and decrement the in-degree of course 2:
+     ```
+     In-degree array: [0, 0, 0, 1]
+     Queue = [2]
+     ```
+
+   - Next, process course 2. Remove the edge `2 → 3` and decrement the in-degree of course 3:
+     ```
+     In-degree array: [0, 0, 0, 0]
+     Queue = [3]
+     ```
+
+   - Finally, process course 3. No more edges to remove, and the queue becomes empty:
+     ```
+     Queue = []
+     ```
+
+4. **Check Completion**:
+   - If all courses have been processed (i.e., visited all nodes), the in-degree array will be all zeros, and we have successfully completed the topological sort.
+   - In this case, all courses were processed, so it is possible to finish all courses. The result is `true`.
+
+---
+
+### Code for Kahn's Algorithm
+
+```java
+class Solution {
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        // Step 1: Initialize the graph
+        int[] indegree = new int[numCourses];
+        List<List<Integer>> adj = new ArrayList<>(numCourses);
+
+        // Create the adjacency list and in-degree array
+        for (int i = 0; i < numCourses; i++) {
+            adj.add(new ArrayList<>());
+        }
+
+        // Step 2: Build the graph by adding directed edges and updating in-degree
+        for (int[] prerequisite : prerequisites) {
+            adj.get(prerequisite[1]).add(prerequisite[0]);
+            indegree[prerequisite[0]]++;
+        }
+
+        // Step 3: Initialize the queue with courses that have no prerequisites (in-degree 0)
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        // Step 4: BFS to process the graph
+        int nodesVisited = 0;
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            nodesVisited++;
+
+            for (int neighbor : adj.get(node)) {
+                // Remove the edge "node -> neighbor"
+                indegree[neighbor]--;
+                if (indegree[neighbor] == 0) {
+                    queue.offer(neighbor);
+                }
+            }
+        }
+
+        // Step 5: Return true if all courses have been visited, else false
+        return nodesVisited == numCourses;
+    }
+}
+```
+
+### Complexity Analysis
+
+- **Time Complexity**: `O(m + n)`
+  - `m` is the number of edges (prerequisites), and `n` is the number of nodes (courses).
+  - Building the adjacency list and in-degree array takes `O(m)` time.
+  - Processing each node and edge also takes `O(m + n)` time.
+  
+- **Space Complexity**: `O(m + n)`
+  - We need space for the adjacency list (`O(m)`), the in-degree array (`O(n)`), and the queue (`O(n)`).
+
+### Explanation of Kahn's Algorithm
+
+1. **Topological Sort**: Kahn's Algorithm uses the idea of topological sorting where we visit nodes in an order such that each node comes after its dependencies (its prerequisites in this case).
+   
+2. **In-degree Array**: The in-degree array tracks how many prerequisites each course has. We start with nodes that have no prerequisites and gradually remove dependencies as we process each course.
+
+3. **Cycle Detection**: If there is a cycle, some courses will always have prerequisites left (in-degree > 0), and we won't be able to process them. Thus, if the number of visited courses is less than `numCourses`, we know a cycle exists.
+
+---
+
+### Why Not DFS (Depth-First Search)?
+
+- DFS is another way to perform topological sort, but it works better for detecting cycles in *smaller, simpler graphs*.
+- **BFS (Kahn's Algorithm)** is preferred for course scheduling because it processes nodes level by level, making it easier to handle dependencies without stack overflow in large graphs.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Question 2 -  Problem: Course Schedule II (Leetcode Link: [Course Schedule II](https://leetcode.com/problems/course-schedule-ii/))
+
+You are given `numCourses` courses labeled from `0` to `numCourses - 1`. You are also given an array of `prerequisites` where `prerequisites[i] = [ai, bi]` indicates that you must take course `bi` before you can take course `ai`.
+
+Return the ordering of courses you should take to finish all courses. If it is impossible to finish all courses, return an empty array.
+
+This is essentially a **graph problem** where the courses are vertices, and the prerequisites represent directed edges. The goal is to return a **topological sort** of the courses if no cycle exists, or an empty array if there is a cycle (indicating that it is not possible to complete all courses).
+
+---
+
+### Key Concepts:
+1. **Graph Representation**:
+   Each course is a node, and if a course `bi` is a prerequisite for another course `ai`, there is a directed edge from node `bi` to node `ai`.
+
+2. **Cycle Detection**:
+   If a cycle exists, it is not possible to complete all courses because some courses depend on each other in a circular fashion.
+
+3. **Topological Sorting**:
+   This problem can be solved using **DFS** (Depth-First Search) to generate a **topological sort**. Topological sorting is possible only if the graph is **acyclic** (i.e., it does not contain any cycles).
+
+---
+
+### Approach (DFS + Cycle Detection)
+
+1. **Color Marking**:
+   - `WHITE` (1): A vertex that has not been visited yet.
+   - `GRAY` (2): A vertex that is currently being visited (part of the recursion stack).
+   - `BLACK` (3): A vertex that has been fully visited.
+
+  #### Why do we need to keep both `GRAY = 2` and `BLACK = 3`?
+
+  In **DFS-based cycle detection**, having both `GRAY` and `BLACK` helps distinguish between nodes that are:
+
+  - **GRAY (2)**: Nodes that are currently being visited (part of the current recursion stack). These nodes have been **discovered** but not yet fully processed.
+  - **BLACK (3)**: Nodes that have been fully processed, meaning all their neighbors have been visited and processed as well. These nodes are **out of the recursion stack**.
+
+  This distinction helps us detect **cycles**:
+  - If during the DFS, we encounter a node that is marked as `GRAY`, it means we are visiting a node that is already in the current recursion path (i.e., we found a back edge), which indicates the presence of a cycle.
+  - Once a node is fully processed, it is marked as `BLACK`. Visiting a `BLACK` node does not indicate a cycle because it has already been processed outside of the current recursion stack.
+
+  In short:
+  - **GRAY** is used to detect cycles.
+  - **BLACK** is used to ensure that once a node is fully processed, we don’t revisit it unnecessarily.
+
+2. **Graph Construction**:
+   The graph is represented using an adjacency list (`adjList`). Each node (course) points to the list of courses that depend on it.
+
+3. **DFS for Cycle Detection**:
+   - We recursively visit each node.
+   - If during a DFS traversal, we encounter a node marked `GRAY` (currently being visited), this indicates a cycle, and we can terminate early.
+
+4. **Topological Sort**:
+   If no cycle is found, we add nodes to the result in **reverse order** of their DFS finishing time (i.e., when the recursion unwinds).
+
+### Why did we not prefer using BFS (Kahn's Algorithm) here?
+
+**DFS-based Topological Sorting** is often preferred when:
+1. **Cycle Detection is Important**: The DFS-based approach allows for easy detection of cycles by marking nodes as `GRAY` when visiting and detecting back edges. In contrast, Kahn’s Algorithm (BFS) does not inherently detect cycles—it just fails to provide a topological sort when a cycle is present.
+   
+2. **Post-order Processing**: DFS naturally allows post-order processing, which is key for topological sorting. This means we visit all dependencies (subtrees) of a node before marking the node itself.
+
+3. **Edge Cases**: DFS handles graphs where not all nodes have dependencies, and the graph isn't fully connected, more gracefully.
+
+**Kahn’s Algorithm (BFS)** is more efficient in some cases but:
+- It requires maintaining an **in-degree array** to keep track of the number of incoming edges.
+- It doesn't directly detect cycles but simply fails to produce a complete topological order when there's a cycle.
+
+---
+
+### Solution Breakdown:
+
+```java
+class Solution {
+  // Define colors for marking the status of each node
+  static int WHITE = 1;  // Unvisited
+  static int GRAY = 2;   // Currently visiting (in stack)
+  static int BLACK = 3;  // Fully visited (processed)
+
+  boolean isPossible;  // To check if a valid topological sort is possible
+  Map<Integer, Integer> color;  // Stores color of each node
+  Map<Integer, List<Integer>> adjList;  // Graph adjacency list representation
+  List<Integer> topologicalOrder;  // To store the topological order of courses
+
+  // Initialization method to set up variables
+  private void init(int numCourses) {
+    this.isPossible = true;  // Assume we can complete all courses
+    this.color = new HashMap<>();  // To keep track of visit status
+    this.adjList = new HashMap<>();  // To store graph as adjacency list
+    this.topologicalOrder = new ArrayList<>();  // To store the course order
+
+    // Initially, mark all courses as WHITE (unvisited)
+    for (int i = 0; i < numCourses; i++) {
+      this.color.put(i, WHITE);
+    }
+  }
+
+  // Depth-First Search (DFS) for cycle detection and topological sort
+  private void dfs(int node) {
+    // If a cycle is found, terminate early
+    if (!this.isPossible) {
+      return;
+    }
+
+    // Mark the node as currently being visited (GRAY)
+    this.color.put(node, GRAY);
+
+    // Visit all neighboring nodes (courses that depend on the current course)
+    for (Integer neighbor : this.adjList.getOrDefault(node, new ArrayList<>())) {
+      if (this.color.get(neighbor) == WHITE) {
+        // If the neighbor is unvisited, perform DFS on it
+        this.dfs(neighbor);
+      } else if (this.color.get(neighbor) == GRAY) {
+        // If the neighbor is currently being visited (GRAY), we found a cycle
+        this.isPossible = false;
+      }
+    }
+
+    // Mark the node as fully visited (BLACK)
+    this.color.put(node, BLACK);
+    // Add the node to the topological order
+    this.topologicalOrder.add(node);
+  }
+
+  // Main function to find the course order
+  public int[] findOrder(int numCourses, int[][] prerequisites) {
+    // Initialize graph and color mapping
+    this.init(numCourses);
+
+    // Build the graph from prerequisites
+    for (int i = 0; i < prerequisites.length; i++) {
+      int dest = prerequisites[i][0];  // Course that depends on another
+      int src = prerequisites[i][1];   // Course that must be taken first
+      List<Integer> lst = adjList.getOrDefault(src, new ArrayList<>());
+      lst.add(dest);
+      adjList.put(src, lst);
+    }
+
+    // Perform DFS on all unvisited nodes
+    for (int i = 0; i < numCourses; i++) {
+      if (this.color.get(i) == WHITE) {
+        this.dfs(i);
+      }
+    }
+
+    // If a valid topological sort is possible, return the course order
+    int[] order;
+    if (this.isPossible) {
+      order = new int[numCourses];
+      for (int i = 0; i < numCourses; i++) {
+        order[i] = this.topologicalOrder.get(numCourses - i - 1);  // Reverse the order
+      }
+    } else {
+      order = new int[0];  // If a cycle is found, return an empty array
+    }
+
+    return order;
+  }
+}
+```
+
+---
+
+### Detailed Breakdown:
+
+1. **Initialization (`init()` method)**:
+   - We initialize:
+     - `isPossible` to `true`, assuming we can complete all courses.
+     - `color` map to track the status (WHITE, GRAY, or BLACK) of each course.
+     - `adjList` to represent the graph as an adjacency list.
+     - `topologicalOrder` to store the final topological ordering.
+
+   - Initially, all courses are marked as **unvisited (WHITE)**.
+
+2. **Graph Construction**:
+   - We loop through the `prerequisites` to build the graph.
+   - For each prerequisite `[a, b]`, we add an edge from `b` to `a` in the adjacency list (`b -> a`).
+
+3. **DFS Traversal (`dfs()` method)**:
+   - **Cycle Detection**: 
+     - If a node is marked **GRAY** during the DFS traversal (i.e., we encounter a node currently in the stack), it indicates a cycle.
+     - If a cycle is found, `isPossible` is set to `false`, and we terminate the search.
+   
+   - **Topological Sorting**:
+     - Once the DFS finishes processing a node, it is added to the `topologicalOrder` list in post-order (meaning, all its dependencies have been processed).
+
+4. **Final Topological Sort**:
+   - If no cycle is found, the topological order is constructed in reverse, as nodes are added in post-order traversal.
+   - If a cycle is detected, we return an empty array, as it is impossible to complete all courses.
+
+---
+
+### Dry Run with Example (With Cycle):
+
+Let's take an example of `numCourses = 4` and `prerequisites = [[1, 0], [2, 1], [3, 2], [1, 3]]`.
+
+This forms a **cyclic graph** because course `1` depends on course `3`, but course `3` indirectly depends on course `1` through other courses.
+
+```
+   0 → 1
+   ↑   ↓
+   3 ← 2
+```
+
+### Initial Setup:
+
+- `WHITE = 1`: Unvisited nodes.
+- `GRAY = 2`: Nodes that are being visited.
+- `BLACK = 3`: Nodes that are fully processed.
+
+```
+Initial:
+color: { 0: WHITE, 1: WHITE, 2: WHITE, 3: WHITE }
+adjList: { 0: [1], 1: [2], 2: [3], 3: [1] }
+topologicalOrder: []
+```
+
+### Step-by-Step DFS:
+
+1. **Visit Node 0**:
+   - Color it `GRAY`.
+   - It has one neighbor, `1`, so we move to `1`.
+
+```
+color: { 0: GRAY, 1: WHITE, 2: WHITE, 3: WHITE }
+```
+
+2. **Visit Node 1**:
+   - Color it `GRAY`.
+   - It has one neighbor, `2`, so we move to `2`.
+
+```
+color: { 0: GRAY, 1: GRAY, 2: WHITE, 3: WHITE }
+```
+
+3. **Visit Node 2**:
+   - Color it `GRAY`.
+   - It has one neighbor, `3`, so we move to `3`.
+
+```
+color: { 0: GRAY, 1: GRAY, 2: GRAY, 3: WHITE }
+```
+
+4. **Visit Node 3**:
+   - Color it `GRAY`.
+   - It has one neighbor, `1`. But `1` is **already marked as GRAY** (meaning we have found a back edge). This indicates a **cycle**.
+   - We stop the DFS traversal and mark that it's **not possible** to complete the courses.
+
+```
+color: { 0: GRAY, 1: GRAY, 2: GRAY, 3: GRAY }
+Cycle Detected! (1 → 3 → 2 → 1)
+```
+
+### Code Breakdown for Cycle Detection:
+
+- **`init` Function**: 
+  Initializes all nodes to `WHITE` and builds the adjacency list from the prerequisites.
+  
+- **`dfs` Function**:
+  1. Colors the current node `GRAY`.
+  2. For each neighbor, checks if it's `WHITE` (not visited) and continues the DFS. If it’s `GRAY` (currently visiting), a cycle is detected.
+  3. Once the node and all its neighbors are processed, it is colored `BLACK` (fully visited) and added to the `topologicalOrder`.
+
+- **Cycle Detection**: If at any point we encounter a `GRAY` node during the DFS, it means a cycle exists, and the function returns `false`.
+
+### Dry Run Explanation for Key Code Portions:
+
+1. **Graph Construction**:
+   ```java
+   for (int i = 0; i < prerequisites.length; i++) {
+      int dest = prerequisites[i][0];
+      int src = prerequisites[i][1];
+      List<Integer> lst = adjList.getOrDefault(src, new ArrayList<>());
+      lst.add(dest);
+      adjList.put(src, lst);
+    }
+   ```
+   - Constructs the adjacency list to represent the course dependencies.
+   - For example, `prerequisites = [[1, 0], [2, 1], [3, 2], [1, 3]]` builds the following adjacency list:
+     ```
+     adjList: { 0: [1], 1: [2], 2: [3], 3: [1] }
+     ```
+
+2. **DFS Traversal**:
+   - For each unvisited node (marked `WHITE`), we perform DFS. If we find a cycle (i.e., revisit a `GRAY` node), we terminate the search.
+   
+   Example code with cycle detection:
+   ```java
+   for (Integer neighbor : this.adjList.getOrDefault(node, new ArrayList<>())) {
+      if (this.color.get(neighbor) == WHITE) {
+         this.dfs(neighbor);
+      } else if (this.color.get(neighbor) == GRAY) {
+         // An edge to a GRAY vertex represents a cycle
+         this.isPossible = false;
+      }
+   }
+   ```
+
+3. **Topological Sorting**:
+   - Once a node and its dependencies are processed, it is marked `BLACK` and added to the `topologicalOrder`.
+
+### Why DFS over BFS in this Case?
+
+- **DFS** is more natural for **topological sorting** because it explores each path to its end before backtracking. This ensures that a node is added to the topological order only after all its dependencies have been processed.
+- **Cycle Detection** is easy to implement using DFS by marking nodes as `GRAY` when they are in the current path and detecting back edges.
+- **BFS (Kahn's Algorithm)** requires maintaining an in-degree array, and while it is more efficient in terms of iterations, it doesn't inherently support easy cycle detection. If we needed only the topological order (without concern for cycles), BFS could be used. However, DFS is better suited for detecting cycles while constructing the topological order.
+
+---
+
+### Time and Space Complexity:
+
+- **Time Complexity**: O(V + E), where:
+  - **V** is the number of courses (vertices).
+  - **E** is the number of prerequisite pairs (edges).
+  - We process each vertex and edge exactly once in the DFS traversal, so the overall complexity is linear with respect to the size of the graph.
+
+- **Space Complexity**: O(V + E), where:
+  - **V** is the space used for storing the color map, recursion stack (in DFS), and topological order.
+  - **E** is the space used for the adjacency list representation of the graph.
+---
+
+### Example Dry Run (Without Cycle):
+
+Let's run an example with `numCourses = 4` and `prerequisites = [[1, 0], [2, 1], [3, 2]]`.
+
+- **Graph Representation**:
+  ```
+  0 → 1 → 2 → 3
+  ```
+
+- **Initialization**:
+  All courses are initially marked **WHITE**.
+
+- **DFS Process**:
+  - Start with course `0`. It has a prerequisite to course `1`, so DFS proceeds to course `1`.
+  - Course `1` has a prerequisite to course `2`, so DFS proceeds to course `2`.
+  - Course `2` has a prerequisite to course `3`, so DFS proceeds to course `3`.
+  - Course `3` has no prerequisites, so it's marked **BLACK** and added to the topological order.
+
+- **Topological Order**:
+  - After DFS finishes for course `3`, we backtrack and mark courses `2`, `1`, and `0` as **BLACK** and add them to the topological order.
+
+- **Final Result**:
+  The final topological order is `[0, 1, 2, 3]`, meaning you can complete the courses in this order.
+
+---
+
+### Time Complexity: O(V + E)
+- **V**: The number of courses (vertices).
+- **E**: The number of prerequisite pairs (edges).
+- The DFS traversal visits each vertex once and explores each edge once, leading to a time complexity of **O(V + E)**.
+
+### Space Complexity: O(V + E)
+- The adjacency list stores each course's prerequisites (edges), which takes **O(E)** space.
+- The `color` map and the `topologicalOrder` list both take **O(V)** space for the courses.
+- Therefore, the space complexity is **O(V + E)**.
+
+---
+
+### Conclusion:
+
+
+- This solution uses **DFS** to detect cycles and construct a topological order for the courses.
+- If a cycle is detected, we return an empty array, as it's impossible to complete all courses.
+- If no cycle is found, we return the valid course order in topological sort.

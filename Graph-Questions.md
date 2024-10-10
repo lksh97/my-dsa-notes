@@ -1368,9 +1368,1173 @@ Let's run an example with `numCourses = 4` and `prerequisites = [[1, 0], [2, 1],
 
 ---
 
+Certainly! Let's break down the provided solution step by step, making it easy to understand even if you're completely new to graph algorithms. We'll cover the problem statement, the approach used in the solution, a detailed example, reasoning behind choosing this approach, its time and space complexities, and some potential interview questions to test your understanding.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Question 3 - Problem (Leetcode Link: [Pacific Atlantic Water Flow](https://leetcode.com/problems/pacific-atlantic-water-flow))
+
+**Pacific Atlantic Water Flow**
+
+You are given an `m x n` grid of non-negative integers representing the height of each cell in a continent. The continent is surrounded by the Pacific Ocean on the **left** and **top** edges and the Atlantic Ocean on the **right** and **bottom** edges.
+
+Water can flow from a cell to its **four** adjacent cells (up, down, left, or right) **if and only if** the adjacent cell's height is **equal to or lower** than the current cell's height.
+
+```csharp
+heights = [
+  [1, 2, 2, 3, 4],
+  [3, 2, 3, 4, 5],
+  [2, 4, 5, 3, 1],
+  [6, 7, 1, 4, 5],
+  [5, 1, 1, 2, 4]
+]
+```
+
+```csharp
+P P P P P
+P - - - A
+P - - - A
+P - - - A
+P A A A A
+```
+**Task:** Find all cells where water can flow to **both** the Pacific and Atlantic Oceans.
+
+**Return:** A list of coordinates `[i, j]` representing the cells where water can flow to both oceans.
+
+---
+
+## **Understanding the Solution**
+
+The provided Java solution uses **Depth-First Search (DFS)** to determine which cells can reach both oceans. Here's a step-by-step explanation tailored for beginners.
+
+### **1. Initial Checks and Setup**
+
+```java
+if (heights.length == 0 || heights[0].length == 0){
+    return new ArrayList<>();
+} 
+
+int row = heights.length;
+int col = heights[0].length;
+
+boolean[][] pacificReachable = new boolean[row][col];
+boolean[][] atlanticReachable = new boolean[row][col];
+```
+
+- **Check for Empty Grid:** If the `heights` grid is empty, return an empty list as there's nothing to process.
+- **Grid Dimensions:** Determine the number of rows (`row`) and columns (`col`) in the grid.
+- **Reachability Matrices:** Create two boolean matrices:
+  - `pacificReachable`: Marks cells from which water can reach the Pacific Ocean.
+  - `atlanticReachable`: Marks cells from which water can reach the Atlantic Ocean.
+
+### **2. Performing DFS from Ocean Borders**
+
+```java
+for(int i = 0; i < row; i++){
+    dfs(i, 0, pacificReachable, heights);       // Left edge (Pacific)
+    dfs(i, col - 1, atlanticReachable, heights); // Right edge (Atlantic)
+}
+
+for(int i = 0; i < col; i++){
+    dfs(0, i, pacificReachable, heights);       // Top edge (Pacific)
+    dfs(row - 1, i, atlanticReachable, heights); // Bottom edge (Atlantic)
+}
+```
+
+- **Pacific Ocean Borders:**
+  - **Left Edge (First Column):** Iterate through each row and perform DFS starting from the first column.
+  - **Top Edge (First Row):** Iterate through each column and perform DFS starting from the first row.
+  
+- **Atlantic Ocean Borders:**
+  - **Right Edge (Last Column):** Iterate through each row and perform DFS starting from the last column.
+  - **Bottom Edge (Last Row):** Iterate through each column and perform DFS starting from the last row.
+
+**Why Start from the Oceans?**
+
+Instead of checking for each cell whether it can reach both oceans (which can be inefficient), we reverse the problem:
+
+- **For Pacific:** Find all cells that can be reached **from** the Pacific Ocean.
+- **For Atlantic:** Find all cells that can be reached **from** the Atlantic Ocean.
+
+The intersection of these two sets gives us the cells that can reach both oceans.
+
+### **3. Collecting the Results**
+
+```java
+List<List<Integer>> result = new ArrayList<>();
+
+for(int i = 0; i < row; i++){
+    for(int j = 0; j < col; j++){
+        if(pacificReachable[i][j] && atlanticReachable[i][j]){
+            result.add(List.of(i, j));
+        }
+    }
+}
+
+return result;
+```
+
+- **Iterate Through All Cells:** For each cell in the grid, check if it's marked as reachable in both `pacificReachable` and `atlanticReachable`.
+- **Add to Result:** If a cell can reach both oceans, add its coordinates to the `result` list.
+
+### **4. Depth-First Search (DFS) Implementation**
+
+```java
+public void dfs(int row, int col, boolean[][] reachable, int[][] heights){
+    
+    int[][] directions = new int[][]{{0,1}, {1,0}, {-1,0}, {0,-1}};
+    
+    reachable[row][col] = true;
+    
+    for(int[] dir: directions){
+        int newRow = row + dir[0];
+        int newCol = col + dir[1];
+        
+        if(newRow < 0 || newRow >= heights.length || newCol < 0 || newCol >= heights[0].length){
+            continue; // Out of bounds
+        }
+        
+        if(reachable[newRow][newCol]){
+            continue; // Already visited
+        }
+        
+        if(heights[newRow][newCol] < heights[row][col]){
+            continue; // Water cannot flow from higher to lower
+        }
+        
+        dfs(newRow, newCol, reachable, heights);
+    }
+}
+```
+
+- **Directions Array:** Represents the four possible movements: right, down, up, and left.
+- **Mark Current Cell as Reachable:** Set `reachable[row][col]` to `true` to indicate that this cell can reach the current ocean.
+- **Explore Neighbors:**
+  - **Boundary Check:** Ensure the new cell is within the grid.
+  - **Visited Check:** If the new cell has already been marked as reachable, skip it to avoid redundant work.
+  - **Height Check:** Only move to neighboring cells that are **equal or higher** in height, ensuring water can flow from higher to lower or same height.
+  - **Recursive DFS Call:** If all checks pass, perform DFS on the neighboring cell.
+
+---
+
+## **Step-by-Step Dry Run with Example**
+
+Let's walk through an example to see how the solution works.
+
+### **Example Grid**
+
+Consider the following `heights` grid:
+
+```
+[
+  [1, 2, 2, 3, 5],
+  [3, 2, 3, 4, 4],
+  [2, 4, 5, 3, 1],
+  [6, 7, 1, 4, 5],
+  [5, 1, 1, 2, 4]
+]
+```
+
+- **Dimensions:** `row = 5`, `col = 5`
+
+### **Step 1: Initialize Reachability Matrices**
+
+- `pacificReachable` and `atlanticReachable` are both 5x5 matrices initialized to `false`.
+
+### **Step 2: Perform DFS from Pacific Borders**
+
+- **Left Edge (First Column):** Cells `(0,0)`, `(1,0)`, `(2,0)`, `(3,0)`, `(4,0)`
+  - Start DFS from each of these cells, marking reachable cells in `pacificReachable`.
+  
+- **Top Edge (First Row):** Cells `(0,0)`, `(0,1)`, `(0,2)`, `(0,3)`, `(0,4)`
+  - Start DFS from each of these cells, marking reachable cells in `pacificReachable`.
+
+### **Step 3: Perform DFS from Atlantic Borders**
+
+- **Right Edge (Last Column):** Cells `(0,4)`, `(1,4)`, `(2,4)`, `(3,4)`, `(4,4)`
+  - Start DFS from each of these cells, marking reachable cells in `atlanticReachable`.
+  
+- **Bottom Edge (Last Row):** Cells `(4,0)`, `(4,1)`, `(4,2)`, `(4,3)`, `(4,4)`
+  - Start DFS from each of these cells, marking reachable cells in `atlanticReachable`.
+
+### **Step 4: Collect Cells Reachable by Both Oceans**
+
+After performing DFS from all border cells, some cells will be marked as reachable in both `pacificReachable` and `atlanticReachable`. For this example, the cells that satisfy this condition are:
+
+```
+[
+  [0,4],
+  [1,3],
+  [1,4],
+  [2,2],
+  [3,0],
+  [3,1],
+  [4,0]
+]
+```
+
+These are the cells from which water can flow to both the Pacific and Atlantic Oceans.
+
+---
+
+## **Reasoning Behind Choosing DFS Approach**
+
+### **Why DFS?**
+
+- **Exploration Efficiency:** DFS is effective for exploring all possible paths from a starting point. In this problem, we're interested in all cells that can be reached from the ocean borders.
+  
+- **Avoiding Redundant Work:** By marking cells as reachable during DFS, we avoid revisiting the same cells multiple times, making the process efficient.
+
+### **Why Start from Oceans Instead of Each Cell?**
+
+- **Optimized Traversal:** Starting DFS from the oceans and marking reachable cells reduces the number of DFS calls. If we were to start DFS from each cell to check if it can reach both oceans, it would result in significantly more computations, especially for large grids.
+
+- **Simplified Intersection:** After performing DFS from both oceans, finding the intersection of reachable cells is straightforward.
+
+---
+
+## **Time and Space Complexity**
+
+### **Time Complexity: O(m * n)**
+
+- **m:** Number of rows in the grid.
+- **n:** Number of columns in the grid.
+  
+- **Explanation:**
+  - Each cell is visited at most twice: once from the Pacific side and once from the Atlantic side.
+  - The DFS explores each cell's neighbors, but since each cell is processed a limited number of times, the overall time complexity is linear relative to the number of cells.
+
+### **Space Complexity: O(m * n)**
+
+- **Explanation:**
+  - Two boolean matrices (`pacificReachable` and `atlanticReachable`) each require O(m * n) space.
+  - The recursion stack for DFS can go up to O(m * n) in the worst case.
+
+---
+
+## **Interview Questions and Answers**
+
+To ensure you've grasped the concepts, here are some potential interview questions along with their answers.
+
+### **1. What is the main idea behind the solution?**
+
+**Answer:** The solution uses Depth-First Search (DFS) starting from the ocean borders to mark cells that can reach each ocean. By performing DFS from both the Pacific and Atlantic borders, we identify cells that are reachable by both oceans by finding the intersection of these two sets of cells.
+
+### **2. Why do we perform DFS from the ocean borders instead of from each cell?**
+
+**Answer:** Performing DFS from the ocean borders is more efficient because it reduces the number of DFS calls. Starting from each cell would lead to redundant computations and higher time complexity, especially for large grids. By reversing the problem, we efficiently identify all cells that can reach each ocean.
+
+### **3. How does the DFS ensure that water can flow from a cell to the ocean?**
+
+**Answer:** During DFS, we only move to neighboring cells that are **equal or higher** in height. This ensures that water can flow from the higher or same height cell to the lower or same height cell, effectively simulating water flow towards the ocean.
+
+### **4. What are the time and space complexities of this solution?**
+
+**Answer:** Both time and space complexities are O(m * n), where m is the number of rows and n is the number of columns in the grid. Each cell is visited at most twice (once for each ocean), and we use additional space for the reachability matrices and the recursion stack.
+
+### **5. Can this solution be optimized further?**
+
+**Answer:** The current solution is already optimized for time and space for this problem. However, iterative approaches using Breadth-First Search (BFS) could be used instead of DFS to potentially improve performance in practice, especially to avoid deep recursion which can lead to stack overflow in large grids.
+
+
+   - What are the advantages of using BFS over DFS in this problem?
+      - Answer: BFS avoids the risk of stack overflow associated with deep recursion in DFS, especially in large grids. It provides a controlled iterative approach using queues, which can be more predictable in terms of memory usage. Additionally, BFS can be more efficient in scenarios where the solution requires exploring cells layer by layer.
+
+   - Could this BFS approach be further optimized?
+      - Answer: The BFS approach is already efficient with O(m * n) time and space complexities. However, minor optimizations could include:
+
+      - Using Bitmasking: Instead of two separate boolean matrices, use a single matrix with bitmask flags to indicate reachability.
+      - Early Termination: If certain conditions allow, terminate BFS early when no further cells can be marked as reachable.
+      - Iterative BFS Optimization: Reuse data structures or minimize object creation within loops for better performance.
+
+### **6. What would happen if the grid is empty? How does the solution handle it?**
+
+**Answer:** If the grid is empty (i.e., `heights.length == 0` or `heights[0].length == 0`), the solution immediately returns an empty list, as there are no cells to process.
+
+### **7. How does the solution determine which cells can reach both oceans?**
+
+**Answer:** After performing DFS from both the Pacific and Atlantic borders, the solution iterates through all cells and selects those that are marked as reachable in both `pacificReachable` and `atlanticReachable` matrices. These cells can flow water to both oceans.
+
+---
+
+## **Conclusion**
+
+This solution efficiently solves the Pacific Atlantic Water Flow problem by leveraging DFS from ocean borders and identifying cells reachable by both oceans. Understanding the reasoning behind the approach, along with its implementation details and complexities, is crucial for mastering similar graph-related problems.
+
 ### Conclusion:
 
 
 - This solution uses **DFS** to detect cycles and construct a topological order for the courses.
 - If a cycle is detected, we return an empty array, as it's impossible to complete all courses.
 - If no cycle is found, we return the valid course order in topological sort.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+## Question 4 - Problem (Leetcode Link: [Number of Islands](https://leetcode.com/problems/number-of-islands/))
+
+## **Problem Statement**
+
+### **Number of Islands**
+
+You are given a 2D grid map consisting of `'1'`s (land) and `'0'`s (water). An **island** is surrounded by water and is formed by connecting adjacent lands **horizontally or vertically**. You may assume all four edges of the grid are surrounded by water.
+
+**Task:** Write an algorithm to count the number of islands in the given grid.
+
+**Example:**
+
+```
+Input:
+11110
+11010
+11000
+00000
+
+Output: 1
+```
+
+```
+Input:
+11000
+11000
+00100
+00011
+
+Output: 3
+```
+
+---
+
+## **Understanding the Solution**
+
+The provided Java solution utilizes **Depth-First Search (DFS)** to traverse the grid and count the number of distinct islands. Here's a step-by-step explanation tailored for beginners.
+
+### **1. Overview of the Approach**
+
+1. **Traverse the Grid:** Iterate through each cell in the grid.
+2. **Identify Land Cells:** When a land cell (`'1'`) is found, it's part of an island.
+3. **Mark Visited Cells:** Use DFS to mark all connected land cells of the current island to avoid recounting them.
+4. **Count Islands:** Increment the island count each time a new unvisited land cell is found.
+
+### **2. Why Use DFS?**
+
+- **Exploration:** DFS is effective for exploring all connected cells in a component (island) before moving to the next.
+- **Simplicity:** The recursive nature of DFS makes it straightforward to implement for this problem.
+- **Efficiency:** Each cell is visited only once, ensuring optimal performance.
+
+---
+
+## **Detailed Code Explanation with Comments**
+
+Let's annotate the provided code with detailed comments to understand each part.
+
+```java
+class Solution {
+    // Main method to count the number of islands
+    public int numIslands(char[][] grid) {
+        // Check if the grid is empty
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+        
+        int row = grid.length;        // Number of rows in the grid
+        int col = grid[0].length;     // Number of columns in the grid
+        
+        int island = 0; // Counter for the number of islands
+        
+        // Iterate through each cell in the grid
+        for(int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                // If the current cell is land ('1'), it's part of an island
+                if(grid[i][j] == '1') {
+                    island++; // Increment island count
+                    dfs(i, j, grid); // Perform DFS to mark all connected land cells
+                }
+            }
+        }
+        
+        return island; // Return the total number of islands found
+    }
+    
+    // DFS method to traverse and mark connected land cells
+    public void dfs(int row, int col, char[][] grid) {
+        int newRow = grid.length;      // Total rows
+        int newCol = grid[0].length;   // Total columns
+        
+        // Directions to move: right, down, left, up
+        int [][] directions = new int[][]{{0,1}, {1,0},{0,-1},{-1,0}};
+        
+        // Base cases to stop recursion:
+        // 1. If the current cell is out of bounds
+        // 2. If the current cell is water ('0')
+        if(row < 0 || col < 0 || row >= newRow || col >= newCol || grid[row][col] == '0') {
+            return;
+        }
+        
+        // Mark the current cell as visited by setting it to '0' (water)
+        grid[row][col] = '0';
+        
+        // Explore all four directions from the current cell
+        for(int[] dir: directions){
+            dfs(row + dir[0], col + dir[1], grid);
+        }
+    }
+}
+```
+
+---
+
+## **Step-by-Step Dry Run with Text Diagrams**
+
+Let's walk through a sample grid to see how the algorithm works.
+
+### **Example Grid**
+
+Consider the following grid:
+
+```
+1 1 1 1 0
+1 1 0 1 0
+1 1 0 0 0
+0 0 0 0 0
+```
+
+**Visual Representation:**
+
+```
+Row\Col 0 1 2 3 4
+   0    1 1 1 1 0
+   1    1 1 0 1 0
+   2    1 1 0 0 0
+   3    0 0 0 0 0
+```
+
+### **Initial Setup**
+
+- **Grid Dimensions:** `row = 4`, `col = 5`
+- **Island Count:** `island = 0`
+
+### **Traversal Process**
+
+We'll traverse the grid cell by cell. When we find a `'1'`, we'll perform DFS to mark all connected `'1'`s as `'0'` to indicate they've been visited.
+
+#### **Step 1: Cell (0,0)**
+- **Value:** `'1'`
+- **Action:** Increment `island` to `1`. Perform DFS from `(0,0)`.
+
+**DFS from (0,0):**
+1. Mark `(0,0)` as `'0'`.
+2. Explore right to `(0,1)`.
+   - **Value:** `'1'`
+   - **Action:** Mark `(0,1)` as `'0'`. Continue DFS.
+3. From `(0,1)`, explore right to `(0,2)`.
+   - **Value:** `'1'`
+   - **Action:** Mark `(0,2)` as `'0'`. Continue DFS.
+4. From `(0,2)`, explore right to `(0,3)`.
+   - **Value:** `'1'`
+   - **Action:** Mark `(0,3)` as `'0'`. Continue DFS.
+5. From `(0,3)`, explore right to `(0,4)`.
+   - **Value:** `'0'` (water). Stop.
+6. From `(0,3)`, explore down to `(1,3)`.
+   - **Value:** `'1'`
+   - **Action:** Mark `(1,3)` as `'0'`. Continue DFS.
+7. From `(1,3)`, explore right to `(1,4)`.
+   - **Value:** `'0'` (water). Stop.
+8. From `(1,3)`, explore down to `(2,3)`.
+   - **Value:** `'0'` (water). Stop.
+9. From `(1,3)`, explore left to `(1,2)`.
+   - **Value:** `'0'` (water). Stop.
+10. From `(1,3)`, explore up to `(0,3)`.
+    - **Value:** `'0'` (already marked). Stop.
+11. Continue backtracking. All connected `'1'`s are marked.
+
+**Grid After DFS:**
+
+```
+0 0 0 0 0
+0 0 0 0 0
+1 1 0 0 0
+0 0 0 0 0
+```
+
+#### **Step 2: Cells (0,1), (0,2), (0,3), (0,4)**
+- **Value:** `'0'` (already marked). **Action:** Skip.
+
+#### **Step 3: Cell (1,0)**
+- **Value:** `'1'`
+- **Action:** Increment `island` to `2`. Perform DFS from `(1,0)`.
+
+**DFS from (1,0):**
+1. Mark `(1,0)` as `'0'`.
+2. Explore right to `(1,1)`.
+   - **Value:** `'1'`
+   - **Action:** Mark `(1,1)` as `'0'`. Continue DFS.
+3. From `(1,1)`, explore right to `(1,2)`.
+   - **Value:** `'0'` (water). Stop.
+4. From `(1,1)`, explore down to `(2,1)`.
+   - **Value:** `'1'`
+   - **Action:** Mark `(2,1)` as `'0'`. Continue DFS.
+5. From `(2,1)`, explore right to `(2,2)`.
+   - **Value:** `'0'` (water). Stop.
+6. From `(2,1)`, explore down to `(3,1)`.
+   - **Value:** `'0'` (water). Stop.
+7. From `(2,1)`, explore left to `(2,0)`.
+   - **Value:** `'1'`
+   - **Action:** Mark `(2,0)` as `'0'`. Continue DFS.
+8. From `(2,0)`, explore right to `(2,1)`.
+   - **Value:** `'0'` (already marked). Stop.
+9. From `(2,0)`, explore down to `(3,0)`.
+   - **Value:** `'0'` (water). Stop.
+10. From `(2,0)`, explore left to `(2,-1)` (out of bounds). Stop.
+11. From `(2,0)`, explore up to `(1,0)`.
+    - **Value:** `'0'` (already marked). Stop.
+12. Continue backtracking. All connected `'1'`s are marked.
+
+**Grid After DFS:**
+
+```
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+```
+
+#### **Step 4: Remaining Cells**
+- All remaining cells are `'0'` (water). **Action:** Skip.
+
+### **Final Count**
+
+- **Total Islands:** `2`
+
+**Output:** `2`
+
+---
+
+## **Textual Diagrams**
+
+To further aid understanding, here's a textual diagram illustrating the process.
+
+### **Initial Grid:**
+
+```
+1 1 1 1 0
+1 1 0 1 0
+1 1 0 0 0
+0 0 0 0 0
+```
+
+### **After First DFS (Island 1):**
+
+```
+0 0 0 0 0
+0 0 0 0 0
+1 1 0 0 0
+0 0 0 0 0
+```
+
+### **After Second DFS (Island 2):**
+
+```
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+```
+
+---
+
+## **Reasoning Behind Choosing DFS Approach**
+
+### **Why Depth-First Search (DFS)?**
+
+1. **Connected Components Identification:** DFS is excellent for identifying and traversing all connected components (islands) in a grid.
+2. **Efficiency:** Each cell is visited exactly once, leading to an optimal time complexity.
+3. **Simplicity:** The recursive nature of DFS makes it straightforward to implement for this problem.
+
+### **Alternative Approaches:**
+
+- **Breadth-First Search (BFS):** Similar to DFS in terms of performance but uses a queue instead of recursion. BFS can also be used effectively for this problem.
+- **Union-Find (Disjoint Set):** Can be used to group connected lands but is generally more complex to implement for beginners.
+
+Given the problem's nature, DFS strikes a balance between efficiency and simplicity, making it an ideal choice.
+
+---
+
+## **Time and Space Complexity**
+
+### **Time Complexity: O(m * n)**
+
+- **m:** Number of rows in the grid.
+- **n:** Number of columns in the grid.
+
+**Explanation:**
+
+- **Traversal:** Each cell is visited once.
+- **DFS Calls:** In the worst case, where the grid is filled with land (`'1'`), DFS will visit all cells, resulting in O(m * n) time.
+
+### **Space Complexity: O(m * n)**
+
+**Explanation:**
+
+- **Recursive Call Stack:** In the worst case (all land), the recursion stack can go up to O(m * n).
+- **Grid Modification:** The grid is modified in place, so no additional space is used for marking visited cells.
+  
+**Note:** If the grid isn't modified in place, additional space (like a visited matrix) would also require O(m * n) space.
+
+---
+
+## **Complete Annotated Code with Detailed Comments**
+
+Here's the complete Java solution with added comments for clarity.
+
+```java
+class Solution {
+    /**
+     * Counts the number of islands in the given grid.
+     *
+     * @param grid 2D character array representing the map where '1' is land and '0' is water.
+     * @return The number of islands.
+     */
+    public int numIslands(char[][] grid) {
+        // Edge case: If grid is null or empty, return 0
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+        
+        int row = grid.length;        // Number of rows
+        int col = grid[0].length;     // Number of columns
+        
+        int island = 0; // Initialize island counter
+        
+        // Iterate through each cell in the grid
+        for(int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                // If the cell is land ('1'), it's part of an island
+                if(grid[i][j] == '1') {
+                    island++; // Increment island count
+                    dfs(i, j, grid); // Perform DFS to mark all connected land cells
+                }
+            }
+        }
+        
+        return island; // Return the total number of islands found
+    }
+    
+    /**
+     * Performs Depth-First Search to mark all connected land cells as visited.
+     *
+     * @param row Current row index.
+     * @param col Current column index.
+     * @param grid 2D character array representing the map.
+     */
+    public void dfs(int row, int col, char[][] grid) {
+        int newRow = grid.length;      // Total number of rows
+        int newCol = grid[0].length;   // Total number of columns
+        
+        // Define directions: right, down, left, up
+        int [][] directions = new int[][]{{0,1}, {1,0},{0,-1},{-1,0}};
+        
+        // Base case checks:
+        // 1. If the current cell is out of bounds
+        // 2. If the current cell is water ('0')
+        if(row < 0 || col < 0 || row >= newRow || col >= newCol || grid[row][col] == '0') {
+            return; // Stop recursion
+        }
+        
+        // Mark the current cell as visited by setting it to '0'
+        grid[row][col] = '0';
+        
+        // Recursively explore all four directions
+        for(int[] dir: directions){
+            int newR = row + dir[0]; // Calculate new row index
+            int newC = col + dir[1]; // Calculate new column index
+            dfs(newR, newC, grid);   // Recursive call for the neighbor cell
+        }
+    }
+}
+```
+
+---
+
+## **Additional Example for Clarity**
+
+Let's consider another example to reinforce understanding.
+
+### **Example Grid:**
+
+```
+1 1 0 0 0
+1 1 0 0 0
+0 0 1 0 0
+0 0 0 1 1
+```
+
+**Visual Representation:**
+
+```
+Row\Col 0 1 2 3 4
+   0    1 1 0 0 0
+   1    1 1 0 0 0
+   2    0 0 1 0 0
+   3    0 0 0 1 1
+```
+
+### **Traversal Process:**
+
+1. **Cell (0,0):** `'1'` → **Island Count:** `1` → Perform DFS.
+   - Mark `(0,0)` as `'0'`.
+   - Explore right `(0,1)`: `'1'` → Mark `'0'`.
+     - Explore right `(0,2)`: `'0'` → Stop.
+     - Explore down `(1,1)`: `'1'` → Mark `'0'`.
+       - Explore right `(1,2)`: `'0'` → Stop.
+       - Explore down `(2,1)`: `'0'` → Stop.
+       - Explore left `(1,0)`: `'1'` → Mark `'0'`.
+         - Explore left `(1,-1)`: Out of bounds → Stop.
+         - Explore down `(2,0)`: `'0'` → Stop.
+         - Explore up `(0,0)`: `'0'` → Stop.
+   - All connected `'1'`s for Island 1 are marked.
+
+2. **Cells (0,1), (1,0), (1,1):** `'0'` (already marked). **Action:** Skip.
+
+3. **Cell (2,2):** `'1'` → **Island Count:** `2` → Perform DFS.
+   - Mark `(2,2)` as `'0'`.
+   - Explore all directions: All neighbors are `'0'` → Stop.
+
+4. **Cell (3,3):** `'1'` → **Island Count:** `3` → Perform DFS.
+   - Mark `(3,3)` as `'0'`.
+   - Explore right `(3,4)`: `'1'` → Mark `'0'`.
+     - Explore right `(3,5)`: Out of bounds → Stop.
+     - Explore down `(4,4)`: Out of bounds → Stop.
+     - Explore left `(3,3)`: `'0'` → Stop.
+     - Explore up `(2,4)`: `'0'` → Stop.
+   - All connected `'1'`s for Island 3 are marked.
+
+**Final Count:** `3`
+
+**Output:** `3`
+
+---
+
+## **Interview Questions and Answers**
+
+To assess your understanding of the **Number of Islands** problem and the DFS-based solution, here are some potential interview questions along with their answers.
+
+### **1. What is the main objective of the Number of Islands problem?**
+
+**Answer:** The main objective is to determine the number of distinct islands in a 2D grid, where an island is formed by connecting adjacent land cells (`'1'`) horizontally or vertically. Diagonal connections do not count.
+
+### **2. Why is Depth-First Search (DFS) an appropriate choice for solving this problem?**
+
+**Answer:** DFS is suitable because it efficiently explores all connected land cells of an island before moving to the next. It ensures that all parts of an island are visited and marked, preventing recounting, and operates with optimal time complexity.
+
+### **3. Can you explain how the DFS function works in this solution?**
+
+**Answer:** The DFS function starts from a land cell (`'1'`), marks it as visited by setting it to `'0'`, and recursively explores all four adjacent directions (right, down, left, up). This process continues until all connected land cells of the current island are visited and marked, ensuring they aren't counted again.
+
+### **4. What is the time complexity of your solution, and why?**
+
+**Answer:** The time complexity is O(m * n), where m is the number of rows and n is the number of columns in the grid. This is because each cell is visited at most once during the traversal.
+
+### **5. What is the space complexity of your solution?**
+
+**Answer:** The space complexity is O(m * n) in the worst case due to the recursion stack in DFS. If the grid is filled with land, the recursion can go as deep as m * n.
+
+### **6. How does your solution handle grids with no land cells?**
+
+**Answer:** If the grid contains no land cells (`'1'`), the algorithm will iterate through all cells without finding any `'1'`. Consequently, the island count remains `0`, which is correctly returned.
+
+### **7. How would your solution change if diagonal connections also counted as part of an island?**
+
+**Answer:** To account for diagonal connections, we would need to include additional directions in the DFS function. Specifically, we would add the four diagonal directions: top-left, top-right, bottom-left, and bottom-right, making a total of eight possible directions to explore from each cell.
+
+**Modified Directions:**
+```java
+int [][] directions = new int[][]{
+    {0,1}, {1,0}, {0,-1}, {-1,0},  // Right, Down, Left, Up
+    {-1,-1}, {-1,1}, {1,-1}, {1,1} // Diagonals
+};
+```
+
+### **8. How does your solution ensure that each island is counted only once?**
+
+**Answer:** Once a land cell is identified as part of an island, DFS marks it and all connected land cells as visited by setting them to `'0'`. This prevents the algorithm from recounting any of these cells as part of another island.
+
+### **9. Could your solution be implemented iteratively instead of recursively? If so, how?**
+
+**Answer:** Yes, the solution can be implemented iteratively using a stack (for DFS) or a queue (for BFS). In an iterative DFS, we use a stack to keep track of cells to visit. Here's a brief outline using a stack:
+
+```java
+public void iterativeDFS(int row, int col, char[][] grid) {
+    Stack<int[]> stack = new Stack<>();
+    stack.push(new int[]{row, col});
+    
+    while(!stack.isEmpty()) {
+        int[] cell = stack.pop();
+        int r = cell[0];
+        int c = cell[1];
+        
+        // Boundary and visited checks
+        if(r < 0 || c < 0 || r >= grid.length || c >= grid[0].length || grid[r][c] == '0') {
+            continue;
+        }
+        
+        grid[r][c] = '0'; // Mark as visited
+        
+        // Push all adjacent cells to the stack
+        stack.push(new int[]{r+1, c});
+        stack.push(new int[]{r-1, c});
+        stack.push(new int[]{r, c+1});
+        stack.push(new int[]{r, c-1});
+    }
+}
+```
+
+### **10. How would you modify your solution to return the size of the largest island?**
+
+**Answer:** To find the size of the largest island, we can introduce a counter within the DFS function to keep track of the number of cells visited during each island traversal. We then compare and store the maximum size found.
+
+**Modified Code Snippet:**
+```java
+public int maxAreaOfIsland(char[][] grid) {
+    if (grid == null || grid.length == 0) {
+        return 0;
+    }
+    
+    int row = grid.length;
+    int col = grid[0].length;
+    
+    int maxArea = 0;
+    
+    for(int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            if(grid[i][j] == '1') {
+                int area = dfsCount(i, j, grid);
+                maxArea = Math.max(maxArea, area);
+            }
+        }
+    }
+    
+    return maxArea;
+}
+
+public int dfsCount(int row, int col, char[][] grid) {
+    int newRow = grid.length;
+    int newCol = grid[0].length;
+    
+    int [][] directions = new int[][]{{0,1}, {1,0},{0,-1},{-1,0}};
+    
+    if(row < 0 || col < 0 || row >= newRow || col >= newCol || grid[row][col] == '0') {
+        return 0;
+    }
+    
+    grid[row][col] = '0'; // Mark as visited
+    int count = 1; // Current cell
+    
+    for(int[] dir: directions){
+        count += dfsCount(row + dir[0], col + dir[1], grid);
+    }
+    
+    return count;
+}
+```
+
+---
+
+## **Conclusion**
+
+The provided Java solution efficiently counts the number of islands in a 2D grid using Depth-First Search (DFS). By iterating through each cell and performing DFS on unvisited land cells, the algorithm ensures that each island is counted exactly once. Understanding this approach equips you with a fundamental graph traversal technique applicable to various similar problems.
+
+---
+
+## **Understanding Space Complexity in DFS Solution**
+
+### **What is Space Complexity?**
+
+**Space Complexity** refers to the amount of memory an algorithm uses in terms of the size of the input data. It accounts for both the space needed for the input itself and any additional space used by the algorithm during its execution.
+
+### **Space Complexity of the DFS Solution**
+
+In the **DFS-based solution** for the Number of Islands problem, the space complexity primarily arises from the **recursion stack**. Here's why:
+
+- **Recursion Stack in DFS:**
+  - DFS explores as far as possible along each branch before backtracking. This means that in the worst-case scenario, where the grid is entirely land (`'1'`), the recursion can go as deep as the total number of cells in the grid.
+  - For a grid with `m` rows and `n` columns, there are `m * n` cells. Therefore, the maximum depth of recursion can be `m * n`, leading to a space complexity of **O(m * n)**.
+
+- **Grid Modification:**
+  - The grid is modified in place to mark visited cells by changing `'1'` to `'0'`. This does not require additional space but alters the input grid.
+
+- **Additional Variables:**
+  - Other variables used in the algorithm (like loop counters and temporary variables) consume **constant space**, which is negligible compared to the recursion stack.
+
+**Final Space Complexity:** **O(m * n)** in the worst case.
+
+**Illustration:**
+
+Consider a grid where all cells are land:
+```
+1 1 1
+1 1 1
+1 1 1
+```
+- DFS will start at `(0,0)` and recursively visit `(0,1)`, `(0,2)`, `(1,2)`, `(2,2)`, `(2,1)`, `(2,0)`, `(1,0)`, and `(1,1)`.
+- The recursion stack grows with each call until all cells are visited.
+- Total recursive calls: `m * n = 3 * 3 = 9`.
+
+---
+
+## **Breadth-First Search (BFS) Solution**
+
+While DFS is effective, **BFS** offers an alternative approach that can be more efficient in practice, especially for large grids, as it avoids deep recursion and potential stack overflow issues.
+
+### **1. Overview of the BFS Approach**
+
+**BFS** explores the grid level by level using a queue. For the Number of Islands problem, BFS can systematically traverse all adjacent land cells connected to a starting land cell.
+
+**Steps:**
+
+1. **Traverse the Grid:** Iterate through each cell in the grid.
+2. **Identify Land Cells:** When a land cell (`'1'`) is found, it's part of an island.
+3. **Mark Visited Cells:** Use BFS to mark all connected land cells of the current island to avoid recounting them.
+4. **Count Islands:** Increment the island count each time a new unvisited land cell is found.
+
+### **2. BFS-Based Solution in Java with Detailed Comments**
+
+```java
+import java.util.LinkedList;
+import java.util.Queue;
+
+class Solution {
+    /**
+     * Counts the number of islands in the given grid using BFS.
+     *
+     * @param grid 2D character array representing the map where '1' is land and '0' is water.
+     * @return The number of islands.
+     */
+    public int numIslands(char[][] grid) {
+        // Edge case: If grid is null or empty, return 0
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+
+        int row = grid.length;        // Number of rows
+        int col = grid[0].length;     // Number of columns
+
+        int island = 0; // Initialize island counter
+
+        // Iterate through each cell in the grid
+        for(int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                // If the cell is land ('1'), it's part of an island
+                if(grid[i][j] == '1') {
+                    island++; // Increment island count
+                    bfs(i, j, grid); // Perform BFS to mark all connected land cells
+                }
+            }
+        }
+
+        return island; // Return the total number of islands found
+    }
+
+    /**
+     * Performs Breadth-First Search to traverse and mark connected land cells as visited.
+     *
+     * @param startRow Starting row index.
+     * @param startCol Starting column index.
+     * @param grid     2D character array representing the map.
+     */
+    public void bfs(int startRow, int startCol, char[][] grid) {
+        int row = grid.length;
+        int col = grid[0].length;
+
+        // Define directions: right, down, left, up
+        int[][] directions = new int[][]{{0,1}, {1,0}, {0,-1}, {-1,0}};
+
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{startRow, startCol});
+        grid[startRow][startCol] = '0'; // Mark as visited
+
+        while(!queue.isEmpty()) {
+            int[] current = queue.poll();
+            int currentRow = current[0];
+            int currentCol = current[1];
+
+            // Explore all four directions from the current cell
+            for(int[] dir : directions) {
+                int newRow = currentRow + dir[0];
+                int newCol = currentCol + dir[1];
+
+                // Check if the new cell is within bounds and is land
+                if(newRow >= 0 && newRow < row && newCol >= 0 && newCol < col && grid[newRow][newCol] == '1') {
+                    queue.offer(new int[]{newRow, newCol}); // Add to queue for further exploration
+                    grid[newRow][newCol] = '0'; // Mark as visited
+                }
+            }
+        }
+    }
+}
+```
+
+## **Comparing DFS and BFS Solutions**
+
+Understanding both DFS and BFS approaches provides flexibility in solving graph-related problems. Here's a concise comparison table highlighting their differences in the context of the Number of Islands problem.
+
+### **Detailed Comparison**
+
+| **Feature**              | **Depth-First Search (DFS)**                                                                     | **Breadth-First Search (BFS)**                                                                    |
+|--------------------------|-------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| **Traversal Order**      | Goes as deep as possible along each branch before backtracking.                                 | Explores all neighbors at the current depth before moving to nodes at the next depth level.       |
+| **Data Structure Used**  | Recursion stack (implicit) or an explicit stack.                                                | Queue (FIFO) to manage the order of exploration.                                                  |
+| **Space Complexity**     | O(m * n) in the worst case due to recursion stack.                                              | O(m * n) in the worst case; typically O(min(m, n)) for balanced grids.                           |
+| **Time Complexity**      | O(m * n) as each cell is visited once.                                                          | O(m * n) as each cell is visited once.                                                             |
+| **Ease of Implementation** | Easy to implement recursively; however, deep recursion can be a drawback.                     | Requires iterative implementation with queue management; slightly more complex.                   |
+| **Memory Usage**         | Potentially higher due to recursion stack, especially for large grids.                         | Generally more controlled as it uses a queue, avoiding deep recursion.                             |
+| **Risk Factors**         | Stack overflow for very large grids due to deep recursion.                                      | Higher memory usage with large queues but avoids stack overflow.                                   |
+| **Practical Considerations** | DFS can be faster in practice due to lower constant factors and better cache performance.     | BFS can be more predictable in terms of memory usage and avoids deep recursive calls.              |
+| **Use Cases Beyond Islands** | Suitable for puzzles, mazes, and scenarios requiring exhaustive exploration.                 | Ideal for shortest path problems, level-order traversals, and scenarios needing breadth-wise exploration. |
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+## Question 5 - Problem (Leetcode Link: [Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence))
+
+### Problem Statement
+The task is to find the **length of the longest consecutive sequence** in an array of integers. A consecutive sequence is a set of numbers that follow one another, for example, in the sequence `[1, 2, 3, 4]`, the length is 4.
+
+Example 1:
+
+Input: nums = [100,4,200,1,3,2]
+Output: 4
+Explanation: The longest consecutive elements sequence is [1, 2, 3, 4]. Therefore its length is 4.
+Example 2:
+
+Input: nums = [0,3,7,2,5,8,4,6,0,1]
+Output: 9
+
+### Approach Overview
+To solve this problem efficiently, we use the following approach:
+1. Use a **HashSet** to store the elements of the array.
+2. Iterate over the array, and whenever we find a number that could be the **start** of a new sequence, we begin counting the length of that sequence.
+3. We keep track of the **longest sequence** we find during this process.
+
+### Step-by-Step Explanation
+
+Here's the Java solution:
+
+```java
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        // Utilizing HashSet to efficiently handle non-duplicate elements
+        HashSet<Integer> numSet = new HashSet<>();
+        for (int num : nums) numSet.add(num);
+
+        // Track the longest consecutive streak found so far
+        int longestStreak = 0;
+
+        // Iterate through the set of numbers
+        for (int num : numSet) {
+            // Check if the current number could be the start of a new consecutive sequence
+            if (!numSet.contains(num - 1)) {
+                int currNum = num;
+                int currStreak = 1;
+
+                // Count the length of the current consecutive streak
+                while (numSet.contains(currNum + 1)) {
+                    currNum++;
+                    currStreak++;
+                }
+
+                // Update the longest streak if necessary
+                longestStreak = Math.max(longestStreak, currStreak);
+            }
+        }
+
+        return longestStreak;
+    }
+}
+```
+
+Let’s break this down step by step.
+
+#### 1. HashSet Initialization
+```java
+HashSet<Integer> numSet = new HashSet<>();
+for (int num : nums) numSet.add(num);
+```
+- **Why Use a HashSet?**: A HashSet helps us to quickly check if a number exists in our collection. The operations to add and check existence in a HashSet are both **O(1)** on average.
+- We iterate through the input array `nums` and add each element to the HashSet `numSet`. This ensures that:
+  - **Duplicates** are eliminated.
+  - We can efficiently check for existence later.
+
+#### 2. Initialize Longest Streak
+```java
+int longestStreak = 0;
+```
+- This variable keeps track of the **length of the longest consecutive sequence** found so far.
+
+#### 3. Iterate Over HashSet
+```java
+for (int num : numSet) {
+    if (!numSet.contains(num - 1)) {
+        int currNum = num;
+        int currStreak = 1;
+
+        while (numSet.contains(currNum + 1)) {
+            currNum++;
+            currStreak++;
+        }
+
+        longestStreak = Math.max(longestStreak, currStreak);
+    }
+}
+```
+- We iterate over each number in `numSet`. The key idea is that we want to **start a new sequence** only if the current number is the **start** of that sequence. 
+  - To determine if a number is the start of a sequence, we check:
+    ```java
+    if (!numSet.contains(num - 1))
+    ```
+    This means that we only start counting from a number if there is **no previous number** (`num - 1`) in the set. For example, if `num` is `1`, and there is no `0` in the set, we know that `1` must be the start of the sequence.
+  
+- If the current number (`num`) is the start of a sequence, we begin to count its length:
+  - We initialize `currNum` to `num` and `currStreak` to `1`.
+  - Then, we continue increasing `currNum` as long as `numSet` contains the **next number** (`currNum + 1`):
+    ```java
+    while (numSet.contains(currNum + 1)) {
+        currNum++;
+        currStreak++;
+    }
+    ```
+  - This loop will keep running until we have reached the end of the current sequence.
+  
+- After calculating the length of the current sequence (`currStreak`), we update `longestStreak` if this sequence is longer than any sequence we have seen so far:
+  ```java
+  longestStreak = Math.max(longestStreak, currStreak);
+  ```
+
+#### Example Dry Run
+Consider the array `[100, 4, 200, 1, 3, 2]`:
+1. After adding all elements to the `HashSet`, we have `{100, 4, 200, 1, 3, 2}`.
+2. Iterate over each element in the set:
+   - For `100`, `num - 1` (`99`) is **not** in the set, so `100` is the start of a sequence. The sequence only contains `100`, so its length is `1`.
+   - For `4`, `num - 1` (`3`) **is** in the set, so `4` is **not** the start of a new sequence.
+   - For `200`, `num - 1` (`199`) is **not** in the set, so `200` is the start of a sequence. The sequence only contains `200`, so its length is `1`.
+   - For `1`, `num - 1` (`0`) is **not** in the set, so `1` is the start of a new sequence:
+     - `1` -> `2` -> `3` -> `4` forms a sequence of length `4`.
+3. The **longest sequence** is `[1, 2, 3, 4]`, and the length is `4`.
+
+### Complexity Analysis
+- **Time Complexity**: **O(n)** where `n` is the number of elements in the array.
+  - We add all elements to the `HashSet` in **O(n)** time.
+  - We then iterate over each element, and each element is processed only once in the while loop.
+- **Space Complexity**: **O(n)** for storing all the elements in the `HashSet`.
+
+### Key Takeaways for Interviews
+- The key to this solution is the **use of a HashSet** to efficiently store and lookup elements.
+- We **only start counting** when we find a **number that could be the start** of a sequence. This reduces unnecessary work and helps us maintain an **O(n)** time complexity.
+- **Why HashSet?** HashSet provides average **O(1)** lookup time, making it ideal for this problem.
+
+By explaining the reasoning behind each step, including a dry run, and providing a complexity analysis, even a beginner should be able to grasp the solution approach.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+## Question 5 - Problem (Leetcode Link: [Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence))

@@ -125,7 +125,7 @@ Dynamic Programming works well here because:
 
 ### Similar Examples in Dynamic Programming
 
-1. **Climbing Stairs Problem**:
+## 1. **Climbing Stairs Problem**:
    - You can either take 1 or 2 steps to reach the top of a staircase with `n` steps.
    - You need to find the number of distinct ways to reach the top.
    - The solution is very similar to Fibonacci, as `ways(n) = ways(n-1) + ways(n-2)`.
@@ -319,7 +319,7 @@ Instead of storing all `dp[i]`, we **only keep track of the last two steps**, wh
 This problem is a great **introduction to Dynamic Programming** and is **similar to Fibonacci**. 🚀
 
 
-2. **Coin Change Problem**:
+## 2. **Coin Change Problem**:
    - Given an amount and a set of coins, find out how many ways you can make up that amount.
    - This involves breaking down the problem into smaller amounts and building up a solution.
 

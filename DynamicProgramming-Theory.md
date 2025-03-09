@@ -130,15 +130,15 @@ Dynamic Programming works well here because:
    - You need to find the number of distinct ways to reach the top.
    - The solution is very similar to Fibonacci, as `ways(n) = ways(n-1) + ways(n-2)`.
 
-## **Understanding the Climbing Stairs Problem Using Dynamic Programming**
+#### **Understanding the Climbing Stairs Problem Using Dynamic Programming**
 The **Climbing Stairs Problem** is a classic **Dynamic Programming** (DP) problem that helps beginners understand **recursion**, **memoization**, and **bottom-up approach**.
 
-### **Problem Statement**
+##### **Problem Statement**
 You are given `n` steps. You can climb either **1 step or 2 steps at a time**. Find out **how many distinct ways** you can reach the top.
 
 ---
 
-## **Solution 1: Recursion (Brute Force)**
+##### **Solution 1: Recursion (Brute Force)**
 ```java
 public class Solution {
     public int climbStairs(int n) {
@@ -158,7 +158,7 @@ public class Solution {
 }
 ```
 
-### **Explanation**
+##### **Explanation**
 - **Recursive Tree:** The function recursively calls itself twice:
   - **One path where we take 1 step** (`i + 1`).
   - **One path where we take 2 steps** (`i + 2`).
@@ -166,7 +166,7 @@ public class Solution {
   - `i == n` (Valid path found → return `1`).
   - `i > n` (Invalid path → return `0`).
 
-#### **Example: `n = 3`**
+##### **Example: `n = 3`**
 Let's visualize the recursive calls.
 
 ```
@@ -180,15 +180,15 @@ climb_Stairs(0, 3)
        ├── climb_Stairs(3, 3) → 1 ✅
        ├── climb_Stairs(4, 3) → 0 ❌
 ```
-### **Total Ways = 3**
+##### **Total Ways = 3**
 
-#### **Complexity Analysis**
+##### **Complexity Analysis**
 - Since we **recompute the same values multiple times**, this solution has an **exponential time complexity** of **O(2ⁿ)**.
 - **Optimization needed** ➝ **Memoization (Top-Down DP).**
 
 ---
 
-## **Solution 2: Recursion + Memoization (Top-Down DP)**
+#### **Solution 2: Recursion + Memoization (Top-Down DP)**
 ```java
 public class Solution {
     public int climbStairs(int n) {
@@ -213,12 +213,12 @@ public class Solution {
 }
 ```
 
-### **Explanation**
+##### **Explanation**
 - We use an **array `memo[]`** to store previously computed results.
 - Before making recursive calls, we check if the value **already exists** in `memo[]`, preventing redundant calculations.
 - If a value is **computed for `climb_Stairs(i, n)` once, it will be reused** next time.
 
-#### **Example: `n = 3`**
+##### **Example: `n = 3`**
 ```
 climb_Stairs(0, 3)
    ├── climb_Stairs(1, 3)
@@ -228,9 +228,9 @@ climb_Stairs(0, 3)
    │   ├── climb_Stairs(3, 3) → 1 ✅ (MEMOIZED)
    ├── climb_Stairs(2, 3) → **MEMOIZED result used!**
 ```
-### **Total Ways = 3**
+##### **Total Ways = 3**
 
-#### **Complexity Analysis**
+##### **Complexity Analysis**
 - **Time Complexity:** **O(n)** (Each subproblem is solved only once).
 - **Space Complexity:** **O(n)** (for memoization array).
 
@@ -256,7 +256,7 @@ public class Solution {
 }
 ```
 
-### **Explanation**
+##### **Explanation**
 - We **build the solution iteratively from step 1 to step `n`**.
 - The recurrence relation is:
   ```
@@ -268,7 +268,7 @@ public class Solution {
   - `dp[2] = 2`
   - For `i ≥ 3`, `dp[i] = dp[i-1] + dp[i-2]`.
 
-#### **Example: `n = 5`**
+##### **Example: `n = 5`**
 ```
 dp[1] = 1
 dp[2] = 2
@@ -276,15 +276,15 @@ dp[3] = dp[2] + dp[1] = 2 + 1 = 3
 dp[4] = dp[3] + dp[2] = 3 + 2 = 5
 dp[5] = dp[4] + dp[3] = 5 + 3 = 8
 ```
-### **Total Ways = 8**
+##### **Total Ways = 8**
 
-#### **Complexity Analysis**
+##### **Complexity Analysis**
 - **Time Complexity:** **O(n)** (Loop runs `n-2` times).
 - **Space Complexity:** **O(n)** (For `dp[]` array).
 
 ---
 
-## **Final Comparison**
+##### **Final Comparison**
 | Solution | Approach | Time Complexity | Space Complexity | Notes |
 |----------|------------|----------------|----------------|--------|
 | **Solution 1** | Recursion (Brute Force) | O(2ⁿ) | O(n) (Recursion Stack) | Exponential time, slow |
@@ -305,12 +305,12 @@ public int climbStairs(int n) {
     return prev1;
 }
 ```
-### **Space Complexity: O(1)**
+##### **Space Complexity: O(1)**
 Instead of storing all `dp[i]`, we **only keep track of the last two steps**, which **reduces space usage drastically**.
 
 ---
 
-## **Conclusion**
+##### **Conclusion**
 - **Brute Force Recursion** is inefficient.
 - **Memoization (Top-Down DP)** improves performance.
 - **Tabulation (Bottom-Up DP)** avoids recursion overhead.

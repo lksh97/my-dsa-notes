@@ -387,6 +387,175 @@ This problem is a great **introduction to Dynamic Programming** and is **similar
    - Given an amount and a set of coins, find out how many ways you can make up that amount.
    - This involves breaking down the problem into smaller amounts and building up a solution.
 
+## **Coin Change Problem - Dynamic Programming (Complete Beginner Guide)**  
+
+#### **🔹 Problem Statement**
+Tumhare paas **ek array of coins** given hai, jisme **different denominations** hai, aur tumhe ek **target amount** banana hai using **minimum number of coins**.  
+
+Agar **target amount nahi ban sakta** given coins se, to return `-1`.  
+
+---
+
+#### **🔹 Example**
+##### **Example 1**
+```plaintext
+Input:
+coins = [1, 2, 5]
+amount = 11
+
+Output:
+3   // (5 + 5 + 1)
+```
+##### **Example 2**
+```plaintext
+Input:
+coins = [2]
+amount = 3
+
+Output:
+-1   // 3 nahi ban sakta sirf 2 ke coins se
+```
+
+---
+
+#### **🔹 Solution Explanation (Dynamic Programming - Bottom-Up Approach)**
+Hum **dynamic programming (DP)** ka use karenge kyunki ye **overlapping subproblems** solve karne me help karta hai aur **optimal solution** deta hai.
+
+💡 **Approach:**  
+1. Ek **DP array `amt[]` banao**, jo **amount tak minimum coins store karega**.  
+2. **Initialization:**  
+   - **amt[0] = 0** (Amount `0` banane ke liye `0` coins chahiye).  
+   - **Baaki saare values ko `amount + 1` se initialize kar do** (Ye signify karega ki abhi koi valid solution nahi mila).  
+3. **Iterate har amount `i` ke liye aur check karo har coin `coins[j]` se:**  
+   - Agar **coin `coins[j]` use kar sakte ho** (i.e. `i >= coins[j]`), to  
+     ```plaintext
+     amt[i] = min(amt[i], 1 + amt[i - coins[j]])
+     ```
+     Yani **ya to existing value rakh lo ya ek aur coin use karke naya chhota value le lo**.  
+4. **Agar `amt[amount]` abhi bhi `amount + 1` hai, to iska matlab ye amount ban nahi sakta, return `-1`**.  
+5. **Warna, `amt[amount]` return karo**, jo **minimum coins needed** hai.
+
+---
+
+##### **🔹 Code with Hinglish Comments**
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        
+        // DP array banate hai jo minimum coins store karega har amount ke liye
+        int amt[] = new int[amount + 1]; 
+        
+        // Sare values ko `amount + 1` se initialize kar do (impossible value denote karne ke liye)
+        Arrays.fill(amt, amount + 1);
+        
+        // Base Case: Amount 0 banane ke liye 0 coins chahiye
+        amt[0] = 0;
+
+        // **Har amount ke liye minimum coins find karna hai**
+        for (int i = 1; i <= amount; i++) {  
+            for (int j = 0; j < coins.length; j++) {  
+                // Agar current coin ka value `i` se chhota ya equal hai tabhi use kar sakte hai
+                if (i >= coins[j]) {  
+                    // Min coins ka update karenge: ya toh previous value rakh lo ya ek aur coin le lo
+                    amt[i] = Math.min(amt[i], 1 + amt[i - coins[j]]);
+                }
+            }
+        }
+        
+        // Agar `amt[amount]` abhi bhi `amount + 1` hai, iska matlab amount nahi ban sakta
+        if (amt[amount] < amount + 1) {
+            return amt[amount];  // Valid answer return karo
+        }
+        return -1;  // Valid solution nahi mila
+    }
+}
+```
+
+---
+
+##### **🔹 Dry Run (Step-by-Step Execution for Input `coins = [1, 2, 5]` & `amount = 11`)**
+---
+##### **Step 1: Initialize DP Table**
+```plaintext
+amt[] = [0, INF, INF, INF, INF, INF, INF, INF, INF, INF, INF, INF]
+```
+(Where `INF = amount + 1 = 12` for initialization)
+
+---
+
+#### **Step 2: Compute DP Values**
+##### **i = 1**
+- `coins[0] = 1` use kar sakte hai:
+  ```plaintext
+  amt[1] = min(amt[1], 1 + amt[1 - 1]) = min(12, 1 + amt[0]) = 1
+  ```
+  ✅ **amt[1] = 1**  
+
+##### **i = 2**
+- `coins[0] = 1` use kar sakte hai:
+  ```plaintext
+  amt[2] = min(amt[2], 1 + amt[2 - 1]) = min(12, 1 + amt[1]) = 2
+  ```
+- `coins[1] = 2` bhi use kar sakte hai:
+  ```plaintext
+  amt[2] = min(amt[2], 1 + amt[2 - 2]) = min(2, 1 + amt[0]) = 1
+  ```
+  ✅ **amt[2] = 1** (kyunki `2` ek hi coin se ban sakta hai)
+
+##### **i = 3**
+- `coins[0] = 1` use kar sakte hai:
+  ```plaintext
+  amt[3] = min(amt[3], 1 + amt[3 - 1]) = min(12, 1 + amt[2]) = 2
+  ```
+- `coins[1] = 2` use kar sakte hai:
+  ```plaintext
+  amt[3] = min(amt[3], 1 + amt[3 - 2]) = min(2, 1 + amt[1]) = 2
+  ```
+  ✅ **amt[3] = 2**
+
+##### **i = 5**
+- `coins[2] = 5` directly use kar sakte hai:
+  ```plaintext
+  amt[5] = min(amt[5], 1 + amt[5 - 5]) = min(12, 1 + amt[0]) = 1
+  ```
+  ✅ **amt[5] = 1** (Kyunki `5` ek hi coin se ban sakta hai)
+
+---
+##### **Final DP Table after filling all values**
+```plaintext
+amt[] = [0, 1, 1, 2, 2, 1, 2, 2, 3, 3, 2, 3]
+```
+
+---
+##### **🔹 Final Answer**
+```plaintext
+amt[11] = 3
+```
+✅ Minimum **3 coins** chahiye (`5 + 5 + 1`).
+
+---
+##### **🔹 Output**
+```plaintext
+3
+```
+
+---
+##### **🔹 Why Use Dynamic Programming?**
+1. **Overlapping Subproblems** → Har amount ke liye hum pehle se stored values use kar rahe hai.
+2. **Optimal Substructure** → Har step me hum **best minimum solution** choose kar rahe hai.
+3. **Time Complexity:** `O(amount × n)` → (n = number of coins)
+4. **Space Complexity:** `O(amount)`
+
+---
+##### **🔹 Summary**
+✔ **DP array `amt[]` maintain karna hai jo minimum coins store karega**  
+✔ **Loop se har amount ke liye minimum coins calculate karna hai**  
+✔ **If `amt[amount] == INF` then return `-1`, otherwise return `amt[amount]`**  
+✔ **Time Complexity = `O(n * amount)`, Space Complexity = `O(amount)`**  
+
+---
 ### More Dynamic Programming Concepts
 
 #### 1. Overlapping Subproblems

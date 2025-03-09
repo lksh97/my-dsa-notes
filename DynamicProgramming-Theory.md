@@ -67,6 +67,70 @@ In this diagram:
 
 This redundancy leads to an **exponential time complexity** of **O(2^n)**, which is very inefficient for large values of `n`.
 
+### Worst-Case Scenario:
+
+In the worst case, we're considering the situation where we are calculating the Fibonacci number for an arbitrary index \(n\) using the **naive recursive algorithm**.
+
+The algorithm works by breaking down the problem into two recursive subproblems:
+- To find \(F(n)\), the algorithm calls:
+  - \(F(n-1)\)
+  - \(F(n-2)\)
+
+For each of these subproblems, the algorithm will recursively compute two more Fibonacci numbers. This means that the computation tree expands exponentially, as each Fibonacci call leads to two more calls.
+
+#### Visualizing the Recursive Tree:
+When you want to compute \(F(n)\), the tree of function calls looks like this:
+
+- **Level 0 (Root)**: You make a call to \(F(n)\).
+  - This splits into:
+  
+- **Level 1**: You now need to calculate \(F(n-1)\) and \(F(n-2)\).
+  - \(F(n-1)\) itself calls \(F(n-2)\) and \(F(n-3)\).
+  - \(F(n-2)\) itself calls \(F(n-3)\) and \(F(n-4)\).
+  
+And the process repeats. At each level, the number of calls doubles, forming a **binary tree** structure.
+
+#### Why \(2^n\)?
+
+Now, let’s address **why the number of calls is \(2^n\)**.
+
+1. **At level 0 (the root)**: You have **1 call** for \(F(n)\).
+2. **At level 1**: You have **2 calls**: \(F(n-1)\) and \(F(n-2)\).
+3. **At level 2**: You have **4 calls**: \(F(n-2)\), \(F(n-3)\), \(F(n-3)\), and \(F(n-4)\).
+4. **At level 3**: You have **8 calls**.
+5. And so on...
+
+At each subsequent level, the number of calls doubles. This is a **binary tree structure** because every call branches into two new calls. The **height of this tree** is roughly \(n\), because you are reducing the argument of the Fibonacci function by 1 at each level (e.g., \(n \to n-1, n-2\), etc.).
+
+In general, the number of function calls at level \(k\) is \(2^k\), and this continues until you reach the base cases \(F(0)\) and \(F(1)\), which do not generate further recursive calls.
+
+#### Total Number of Calls:
+The total number of calls is the sum of calls at each level of recursion. This is approximately:
+
+\[
+1 + 2 + 4 + 8 + 16 + \dots + 2^k
+\]
+
+Where \(k\) is the number of levels, which is proportional to \(n\) (because the recursive calls keep decreasing the argument by 1). The sum of this series is approximately \(2^n\), since the largest term \(2^n\) dominates the sum.
+
+Thus, the time complexity is \(O(2^n)\), because the total number of recursive calls grows exponentially as \(n\) increases.
+
+### Why It’s Exponential:
+The reason it's \(2^n\) and not something else is that for each call to calculate \(F(n)\), you generate two more calls. Each call to a Fibonacci function essentially "splits" into two subproblems, causing the recursive call tree to grow exponentially with a branching factor of 2. The total number of nodes (calls) in this tree is proportional to \(2^n\).
+
+---
+
+### Worst-Case Breakdown:
+1. **Root level (level 0)**: 1 call (\(F(n)\))
+2. **Level 1**: 2 calls (\(F(n-1)\) and \(F(n-2)\))
+3. **Level 2**: 4 calls (\(F(n-2), F(n-3), F(n-3), F(n-4)\))
+4. **Level 3**: 8 calls
+5. ... and so on, doubling at each level.
+
+The total number of calls is roughly \(2^n\), leading to the **exponential time complexity of \(O(2^n)\)**.
+
+This exponential time complexity is a result of the repeated subproblems. Many of these calls are redundant (e.g., \(F(n-2)\) is calculated multiple times), which is why this algorithm is inefficient for large \(n\).
+
 ### Improving with Dynamic Programming
 
 To avoid recomputation, we can use **Dynamic Programming** by storing the values of already computed Fibonacci numbers. This can be done either by:

@@ -924,6 +924,191 @@ List<String> list = new ArrayList<>(Arrays.asList(s.split(separate, -1)));
 | `Arrays.asList()` | **Fixed-size list banata hai**, `add()` aur `remove()` nahi chalega. |
 | `s.split()` | **String todne ke liye use hota hai**, lekin default trailing empty strings remove kar deta hai. |
 | `s.split(separate, -1)` | **Sabhi empty strings preserve karta hai**, jo encoding-decoding ke liye zaroori hai. |
+
+
+
+-----
+
+# **🔹  Problem 3: Longest Consecutive Sequence - Deep Explanation for Interview**
+Yeh problem **unsorted array me longest consecutive sequence** dhoondhne ke liye hai.  
+Aur hume **O(N) time complexity** me solution likhna hai.
+
+---
+
+## **🔹 Problem Understanding**
+### **✅ Problem Statement**
+Given an **unsorted array**, hume **longest consecutive sequence ka length** return karna hai.
+
+- **Consecutive sequence** → Ek aisa sequence jisme **back-to-back numbers** ho.
+- **Duplicate elements ignore karne hai.**
+- **Sorting allowed nahi hai** kyunki **O(N log N) se fast hona chahiye.**
+
+---
+
+## **🔹 Example Walkthrough**
+### **Example 1**
+```plaintext
+Input: nums = [100,4,200,1,3,2]
+```
+🔹 **Sorted View** (just for clarity): `[1, 2, 3, 4, 100, 200]`
+
+✅ **Longest consecutive sequence** = `[1, 2, 3, 4]` → **Length = 4**  
+
+```plaintext
+Output: 4
+```
+---
+### **Example 2**
+```plaintext
+Input: nums = [0,3,7,2,5,8,4,6,0,1]
+```
+🔹 **Sorted View**: `[0, 1, 2, 3, 4, 5, 6, 7, 8]`
+
+✅ **Longest consecutive sequence** = `[0, 1, 2, 3, 4, 5, 6, 7, 8]` → **Length = 9**  
+
+```plaintext
+Output: 9
+```
+---
+### **Example 3**
+```plaintext
+Input: nums = [1,0,1,2]
+```
+🔹 **Sorted View**: `[0, 1, 1, 2]`
+
+✅ **Longest consecutive sequence** = `[0, 1, 2]` → **Length = 3**  
+
+```plaintext
+Output: 3
+```
+
+---
+
+## **🔹 Approach: Using HashSet**
+### **⚡ Why HashSet?**
+- **Fast Lookup (O(1))**: Har number ko **quickly check kar sakte hain** HashSet me.
+- **Duplicate Handling**: HashSet **automatically duplicate elements hata deta hai**.
+- **Sorting Avoid**: Sorting nahi use karna, kyunki **O(N log N)** se fast solution chahiye.
+
+---
+
+## **🔹 Dry Run (With Text Diagram)**
+### **Example: `nums = [100,4,200,1,3,2]`**
+### **Step 1: HashSet me store karo**
+```plaintext
+numSet = {100, 4, 200, 1, 3, 2}
+```
+
+---
+### **Step 2: Consecutive Sequence Find Karo**
+Har number ke liye **ye check karo ki kya ye sequence ka starting point ho sakta hai?**  
+**Start condition:** Agar `num - 1` **set me nahi hai**, to iska matlab ye ek **naya sequence ka start ho sakta hai**.
+
+---
+| **Number** | **num - 1 Exists?** | **Sequence Start?** | **Consecutive Length** |
+|-----------|---------------------|---------------------|-------------------|
+| `100` | ❌ `99` nahi hai | ✅ **New Sequence Start** | `100` **length = 1** |
+| `4` | ✅ `3` exists | ❌ Skip |
+| `200` | ❌ `199` nahi hai | ✅ **New Sequence Start** | `200` **length = 1** |
+| `1` | ❌ `0` nahi hai | ✅ **New Sequence Start** | `[1 → 2 → 3 → 4]` **length = 4** |
+| `3` | ✅ `2` exists | ❌ Skip |
+| `2` | ✅ `1` exists | ❌ Skip |
+
+**✅ Maximum Consecutive Length = `4` (from [1,2,3,4])**
+
+```plaintext
+Output: 4
+```
+
+---
+
+## **🔹 Code with Hinglish Comments**
+```java
+import java.util.HashSet;
+
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        // ✅ Step 1: HashSet me saare elements daal do (Duplicate handle ho jayenge)
+        HashSet<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+
+        int longestStreak = 0;  // ✅ Final longest sequence ka length store karne ke liye
+
+        // ✅ Step 2: Iterate through set and find longest sequence
+        for (int num : numSet) {
+            // ❌ Agar num-1 set me hai, to yeh middle ka element hai, isko ignore karo
+            if (!numSet.contains(num - 1)) {
+                int currNum = num;      // ✅ Current sequence ka starting point
+                int currStreak = 1;     // ✅ Streak length ko 1 se start karo
+
+                // ✅ Jab tak `currNum+1` set me hai, sequence continue karo
+                while (numSet.contains(currNum + 1)) {
+                    currNum++;   // ✅ Next number check karo
+                    currStreak++;  // ✅ Streak badhaya
+                }
+
+                // ✅ Maximum streak ko update karo
+                longestStreak = Math.max(longestStreak, currStreak);
+            }
+        }
+
+        return longestStreak;  // ✅ Final answer return karo
+    }
+}
+```
+
+---
+
+## **🔹 Time & Space Complexity Analysis**
+| **Operation** | **Complexity** | **Explanation** |
+|--------------|--------------|--------------|
+| **Insert in HashSet** | `O(N)` | `N` elements HashSet me daal rahe hain |
+| **Iterate over HashSet** | `O(N)` | Har element ko ek hi baar check karenge |
+| **Total Complexity** | **`O(N)`** | **Optimized solution** |
+| **Space Complexity** | `O(N)` | HashSet me `N` elements store ho rahe hain |
+
+✅ **Final Complexity = `O(N)` time & `O(N)` space (HashSet)**
+
+---
+
+## **🔹 Interview-Ready Explanation**
+### ✅ **Q1: Tumhara approach kya hai?**
+💡 **A:**  
+- **HashSet me saare numbers store kar rahe hain** (taaki lookup fast ho).  
+- **Har number ke liye check kar rahe hain** ki kya **ye ek new sequence ka start ho sakta hai**.  
+- **Agar sequence start ho sakta hai**, to **usko expand kar rahe hain jab tak numbers mil rahe hain**.  
+
+---
+### ✅ **Q2: `num - 1` check karne ka kya logic hai?**
+💡 **A:**  
+Agar **`num - 1` HashSet me hai**, iska matlab **ye kisi existing sequence ka part hai**.  
+Agar **`num - 1` nahi hai**, iska matlab **ye ek naye sequence ka starting point ho sakta hai**.
+
+---
+### ✅ **Q3: Sorting se kyu nahi kiya?**
+💡 **A:**  
+- **Sorting `O(N log N)` time leti** hai, jo **O(N) se slow hai**.  
+- **HashSet fast lookup deta hai (`O(1)`)**, jo **better approach hai**.  
+
+---
+### ✅ **Q4: Edge Cases kaise handle kiye?**
+💡 **A:**  
+- **Empty Array (`[]`) → Output = 0**
+- **Single Element ([5]) → Output = 1**
+- **Duplicate Elements ([1,2,2,3]) → Ignore duplicates**
+- **Negative Numbers ([-1,-2,0,1]) → Works Fine**
+
+---
+## **🔹 Final Summary**
+✔ **Best approach: HashSet + Linear Scan**  
+✔ **`O(N)` Time Complexity, `O(N)` Space Complexity**  
+✔ **Fastest solution without sorting**  
+✔ **Interview me confidently explain kar sakte ho!** 🚀🔥  
+
+---
+🔥 **Ab tum ye problem interview me confidently explain kar sakte ho! 🚀💪**
 | `s.equals(t)` | **Content compare karta hai, reference nahi.** |
 | `s1 == s2` | **Reference compare karta hai, content nahi.** |
 

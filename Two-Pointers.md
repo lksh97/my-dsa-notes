@@ -538,9 +538,9 @@ Hume ek **integer array `height[]`** diya hai jo **bars ka height** represent ka
 height = [3, 0, 2, 0, 4]
 ```
 📌 **Visual Representation:**  
-
 <img width="199" alt="trapping-rain-water" src="https://github.com/user-attachments/assets/2729d242-1228-458f-bfbd-1a195dc2a5e0" />
 
+`Corners par koi water store nahi hoga kyunki unke left ya right mein walls nahi hain`
 
 🔹 **Water stored at index 1:** `min(2,3) - 0 = 2`  
 🔹 **Water stored at index 2:** `min(2,3) - 1 = 1`  

@@ -1,3 +1,242 @@
+## 🔹 **Sliding Window Technique - Theory, Explanation & Example** (Hinglish)
+
+Sliding Window ek **efficient approach hai jo sequential data** (arrays ya strings) ke saath use hoti hai, **jab hume kisi contiguous (continuous) subarray ya substring par operations perform karni hoti hai**.
+
+💡 **Key Idea**:
+- Ek **"window" (subarray/substring)** select karte hain jo dynamically **expand** aur **contract** hoti hai.
+- Window ko dynamically adjust karke optimal solution nikalte hain bina **brute-force (`O(n²)`)** approach use kiye.
+
+---
+
+## 🔹 **Types of Sliding Window**
+1️⃣ **Fixed Sliding Window**  
+   - **Jab window ka size fix hota hai.**  
+   - Example: "Find maximum sum of subarray of size `k`".
+   - **Expand karne ke saath ek fixed size tak maintain karna hota hai.**  
+
+2️⃣ **Variable Sliding Window**  
+   - **Jab window ka size dynamically badhta aur ghata hai.**  
+   - Example: "Find the smallest subarray whose sum is `>= target`".
+   - **Expand karna aur contract karna dono zaroori hota hai.**  
+
+---
+
+## 🔹 **Theory of Sliding Window**
+💡 **Sliding Window 3 steps me kaam karta hai:**
+
+### **Step 1: Expand Window (right pointer)**
+- Jab tak **condition satisfy nahi hoti**, right pointer badhao aur window expand karo.  
+
+### **Step 2: Shrink Window (left pointer)**
+- Jab condition satisfy ho jaye, **left pointer move karke window ko chhota karo**, taaki **optimal solution mile**.
+
+### **Step 3: Update Answer**
+- **Har step pe current window ka answer update karte raho**, aur **sabse optimal window length ya sum ya substring track karo**.
+
+---
+
+## 🔹 **Text Diagram for Sliding Window**
+💡 **Example:** `"Find the longest substring without repeating characters"`  
+📌 **Input:** `"abcabcbb"`
+
+```plaintext
+Index:   0   1   2   3   4   5   6   7  
+Chars:   a   b   c   a   b   c   b   b  
+         ↑   ↑
+      (start) (end)
+      Expand Window
+```
+✅ **Step 1:** `"abc"` valid hai, `end` pointer aage badhao.  
+❌ **Step 2:** `'a'` duplicate mil gaya → `start` pointer badhao.  
+✅ **Step 3:** `"bca"` valid hai, max length update karo.  
+
+---
+## 🔹 **Example 1: Fixed Size Sliding Window**
+📌 **Problem:** `Find the maximum sum of any subarray of size k`
+
+```java
+public int maxSum(int[] nums, int k) {
+    int maxSum = Integer.MIN_VALUE; // Sabse chhota possible value rakho, taaki negative values bhi handle ho jaye
+    int sum = 0; // Yeh sliding window ka sum track karega
+
+    for (int i = 0; i < nums.length; i++) {
+        sum += nums[i]; // Window ka ek element add kar rahe hain (Expand window)
+
+        // Jab tak window ka size 'k' nahi hota, sirf sum collect karo
+        if (i >= k - 1) {  // Jab i, k-1 ya usse bada ho tabhi window valid hai
+            maxSum = Math.max(maxSum, sum); // Max sum ko update karte raho
+            sum -= nums[i - k + 1]; // Window ka pehla element hatao (Shrink window)
+        }
+    }
+
+    return maxSum; // Maximum sum return karo
+}
+```
+
+---
+
+### ✅ **Explanation (Step by Step in Hinglish)**
+1. **Initialize variables:**
+   - `maxSum` ko `Integer.MIN_VALUE` rakha, taaki negative values bhi properly handle ho.
+   - `sum` ko `0` rakha, jo current window ka sum track karega.
+
+2. **Traverse the array using a sliding window approach:**
+   - `sum += nums[i]` -> Naya element add karo (expand window).
+   - Jab tak `i < k - 1`, tab tak sirf sum collect karo, kyunki valid window nahi bani hai.
+
+3. **Once window size `k` is reached:**
+   - `maxSum = Math.max(maxSum, sum)` -> Maximum sum ko update karo.
+   - `sum -= nums[i - k + 1]` -> Pehle wale element ko hatao (shrink window).
+
+4. **Loop continues until we check all subarrays of size `k`.**
+5. **Finally, return `maxSum`, which holds the maximum sum of any subarray of size `k`.**
+
+---
+
+### ✅ **Example Walkthrough**
+**Input:**
+```java
+int[] nums = {2, 1, 5, 1, 3, 2};
+int k = 3;
+System.out.println(maxSum(nums, k)); 
+```
+
+**Steps:**
+| Index (`i`) | `nums[i]` | `sum` (After Add) | `maxSum` (After Compare) | `sum` (After Remove) |
+|-------------|----------|------------------|---------------------|----------------|
+| 0           | 2        | 2                | -                   | -              |
+| 1           | 1        | 3                | -                   | -              |
+| 2           | 5        | 8                | 8                   | 6 (Remove `2`) |
+| 3           | 1        | 7                | 8                   | 6 (Remove `1`) |
+| 4           | 3        | 9                | 9                   | 4 (Remove `5`) |
+| 5           | 2        | 6                | 9                   | 5 (Remove `1`) |
+
+**Output:**  
+```
+9
+```
+(Maximum sum subarray `{5, 1, 3}` gives sum `9`.)
+
+---
+
+### ✅ **Time Complexity**
+- **O(N)**, because we traverse the array once (`N` elements), and each element is added & removed from the window exactly once.
+
+### ✅ **Space Complexity**
+- **O(1)**, as we are using only a few integer variables (`sum`, `maxSum`), no extra space needed.
+
+---
+## 🔹 **Example 2: Variable Size Sliding Window**
+📌 **Problem:** `Find the smallest subarray with sum >= target`
+
+```java
+public int minSubArrayLen(int target, int[] nums) {
+    int start = 0, sum = 0, minLength = Integer.MAX_VALUE; // Minimum length track karne ke liye
+
+    for (int end = 0; end < nums.length; end++) {
+        sum += nums[end]; // Window expand kar rahe hain (naya element add karo)
+
+        // Jab tak sum >= target ho, window ko shrink karne ki koshish karo
+        while (sum >= target) {
+            minLength = Math.min(minLength, end - start + 1); // Minimum length update karo
+            sum -= nums[start]; // Window ka pehla element hatao (shrink window)
+            start++; // Start pointer ko aage badhao
+        }
+    }
+
+    // Agar koi valid subarray nahi mila, toh 0 return karo
+    return (minLength == Integer.MAX_VALUE) ? 0 : minLength;
+}
+```
+
+---
+
+### ✅ **Explanation (Step by Step in Hinglish)**
+
+1. **Initialize variables:**
+   - `start = 0` → Window ka start pointer.
+   - `sum = 0` → Window ka current sum.
+   - `minLength = Integer.MAX_VALUE` → Minimum subarray length track karne ke liye.
+
+2. **Expand window (Increase `end` pointer)**:
+   - `sum += nums[end]` → Current window mein naya element add karo.
+
+3. **Shrink window (Move `start` pointer)**:
+   - Jab tak `sum >= target`, minimum subarray length update karo.
+   - `sum -= nums[start]` → Pehla element hatao.
+   - `start++` → Window ka start aage badhao.
+
+4. **Final check**:
+   - Agar `minLength` ab bhi `Integer.MAX_VALUE` hai, iska matlab koi valid subarray nahi mila → Return `0`.
+   - Warna, `minLength` return karo.
+
+---
+
+### ✅ **Example Walkthrough**
+#### **Input:**
+```java
+int target = 7;
+int[] nums = {2, 3, 1, 2, 4, 3};
+System.out.println(minSubArrayLen(target, nums));
+```
+
+#### **Steps:**
+| `end` | `nums[end]` | `sum` (After Add) | `minLength` (After Shrink) | `sum` (After Remove) | `start` (Updated) |
+|------|------------|------------------|----------------------|----------------|---------|
+| 0    | 2          | 2                | -                    | -              | 0       |
+| 1    | 3          | 5                | -                    | -              | 0       |
+| 2    | 1          | 6                | -                    | -              | 0       |
+| 3    | 2          | 8                | **4** (`[2,3,1,2]`)  | 6 (Remove `2`) | 1       |
+| 4    | 4          | 10               | **3** (`[3,1,2,4]`)  | 7 (Remove `3`) | 2       |
+| 5    | 3          | 10               | **2** (`[4,3]`)      | 6 (Remove `1`) | 3       |
+| 5    | 3          | 6                | 2                    | -              | -       |
+
+#### **Output:**
+```java
+2
+```
+(Smallest subarray `[4, 3]` has sum `7`.)
+
+---
+
+### ✅ **Time & Space Complexity**
+- **Time Complexity:** `O(N)`, because each element is processed at most twice (once when added, once when removed).
+- **Space Complexity:** `O(1)`, since we only use a few integer variables.
+
+---
+
+## 🔹 **Sliding Window Vs. Brute Force**
+| **Approach** | **Time Complexity** | **Space Complexity** | **Why Efficient?** |
+|-------------|--------------------|--------------------|-----------------|
+| **Brute Force** | `O(n²)` | `O(1)` | Har possible subarray check karega |
+| **Sliding Window** | `O(n)` | `O(1)` | **Dynamic adjustment se unnecessary checks avoid hote hain** |
+
+---
+
+## 🔹 **Key Points to Mention in Interviews**
+1️⃣ **Sliding Window Ka Use Case**  
+   - Jab **continuous subarray ya substring** pe operation karni ho.  
+   - **Fixed ya Variable Size window** problems ke liye best approach hai.  
+
+2️⃣ **Optimality of O(n) Complexity**  
+   - Ek hi loop me **window expand aur contract hota hai**, isiliye `O(n²)` se fast hai.  
+
+3️⃣ **Fixed vs. Variable Window Difference**  
+   - **Fixed Window:** **Window ka size fixed hota hai** (`k` given hota hai).  
+   - **Variable Window:** **Window dynamically badhta/ghatta hai** (`sum ≥ target` jaisa condition hota hai).  
+
+---
+
+## 🔹 **Interview Me Answer Kaise De**
+**Q:** `Sliding Window kya hota hai?`
+✅ **A:** `"Sliding Window ek efficient approach hai jisme ek dynamically expanding aur contracting window ka use hota hai taaki kisi substring ya subarray par operations fast ho sake."`
+
+**Q:** `Sliding Window Brute Force se better kyu hai?`
+✅ **A:** `"Brute force har subarray ko check karta hai, jo `O(n²)` slow hai. Sliding Window dynamically window adjust karta hai jo `O(n)` me fast hota hai."`
+
+---
+
+
 ## 📌 Problem 1: **Minimum Size Subarray Sum (Hinglish Explanation + Dry Run + Text Diagrams)**  
 
 ---

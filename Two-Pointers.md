@@ -519,8 +519,7 @@ left = 0, right = 8, maxarea = 0
 ### 📌 Problem 4: **Trapping Rain Water - Interview Preparation (Hinglish + Dry Run + Text Diagrams)**  
 
 ---
-
-## 🔹 **Problem Samajhne Ka Tarika**
+## 🔹**Problem Samajhne Ka Tarika**
 Hume ek **integer array `height[]`** diya hai jo **bars ka height** represent karta hai. Hume ye batana hai ki **kitna water trap ho sakta hai** bars ke beech me.
 
 💡 **Water tabhi trap ho sakta hai jab left aur right dono taraf ek bada wall ho!**  
@@ -736,5 +735,196 @@ trappedWater = 0
 ✅ **Always move the smaller height pointer**  
 ✅ **Dry-run aur text diagram se interview me explain karna zaroori**  
 ✅ **Best solution for "Trapping Rain Water" problem!** 🚀  
+
+💡 **Ye approach aapko interviews me edge degi!** 🔥
+
+---
+
+
+### 📌 Problem 5: **Two Sum II - Input Array is Sorted (Hinglish Explanation + Dry Run + Code with Detailed Comments)**  
+
+---
+
+## 🔹 **Problem Samajhne Ka Tarika**  
+Hume ek **sorted integer array `numbers[]`** diya hai **aur ek target value**. Hume **do numbers aise dhoondhne hain** jinka sum target ke **equal ho** aur unke **1-based index return karne hain**.
+
+💡 **Constraints:**
+- Input **sorted hoga** (increasing order).
+- **Sirf ek solution exist karega**.
+- **1-based indexing return karni hai**, **not 0-based**.
+
+---
+
+## 🔹 **Example & Text Diagram**  
+📌 **Example Input:**  
+```java
+numbers = [2, 7, 11, 15], target = 9
+```
+📌 **Output:**  
+```
+[1, 2]  // 1-based index
+```
+
+📌 **Explanation:**  
+**2 + 7 = 9**, toh `numbers[0]` (index 1) aur `numbers[1]` (index 2) solution hai.
+
+💡 **Text Diagram:**
+```
+Index:  1   2   3   4  
+Numbers: 2   7  11  15  
+         ↑        ↑  
+        low      high  
+    (2 + 15 = 17) > 9 → high--
+         
+Index:  1   2   3   4  
+Numbers: 2   7  11  15  
+         ↑   ↑  
+        low high  
+    (2 + 7 = 9) ✅ Found Answer  
+```
+
+---
+
+## 🔹 **Brute Force Approach 🐢 (TLE Hoga!)**  
+Sab possible pairs ko check karna (`O(n²)` complexity).
+
+```java
+public int[] twoSum(int[] numbers, int target) {
+    for (int i = 0; i < numbers.length; i++) {
+        for (int j = i + 1; j < numbers.length; j++) {
+            if (numbers[i] + numbers[j] == target) {
+                return new int[]{i + 1, j + 1};  // 1-based index
+            }
+        }
+    }
+    return new int[]{-1, -1}; // No solution case
+}
+```
+⛔ **Problem:** **O(n²) complexity**, bahut slow for large `n` (max `10^5`).
+
+---
+
+## 🔹 **Optimized Approach - Two Pointers 🚀**
+**Strategy:**
+1. **Left aur Right Pointer Lo:** `low = 0`, `high = n-1`
+2. **Sum Calculate Karo**:
+   - **Agar sum == target** → return indexes.
+   - **Agar sum < target** → `low++` (left badhao).
+   - **Agar sum > target** → `high--` (right kam karo).
+3. **Jab tak low < high, loop chalayenge**.
+
+---
+
+## 🔹 **Code Implementation with Hinglish Comments**
+```java
+class Solution {
+    public int[] twoSum(int[] numbers, int target) {
+
+        // Do pointers define karte hain - ek start se, ek end se
+        int low = 0;  
+        int high = numbers.length - 1;  
+
+        // Jab tak left pointer chhota hai right pointer se, loop chalega
+        while (low < high) {
+            
+            // Dono numbers ka sum nikalte hain
+            int sum = numbers[low] + numbers[high];
+
+            // Agar sum target ke equal hai, toh answer mil gaya
+            if (sum == target) {  
+                return new int[] { low + 1, high + 1 };  // 1-based index return
+            }
+            
+            // Agar sum chhota hai target se, toh chhota number badhane ka try karenge
+            else if (sum < target) {  
+                ++low;  // Left pointer ko aage badhao
+            } 
+            
+            // Agar sum bada hai target se, toh bada number kam karne ka try karenge
+            else {  
+                --high;  // Right pointer ko peeche le jao
+            }
+        }
+
+        // Agar koi solution nahi mila, toh {-1, -1} return karenge
+        return new int[] { -1, -1 };
+    }
+}
+```
+
+---
+
+## 🔹 **Dry Run - Step-by-Step Execution**
+📌 **Input:**  
+```java
+numbers = [2, 7, 11, 15], target = 9
+```
+📌 **Initialization:**  
+```
+low = 0, high = 3
+```
+
+| **Step** | **low** | **high** | **numbers[low]** | **numbers[high]** | **Sum** | **Action** |
+|---------|--------|--------|---------------|---------------|------|-------------|
+| 1 | 0 | 3 | 2 | 15 | 17 | `high--` |
+| 2 | 0 | 2 | 2 | 11 | 13 | `high--` |
+| 3 | 0 | 1 | 2 | 7 | 9 | ✅ **Found Answer!** |
+
+✅ **Final Answer:** `[1, 2]`
+
+---
+
+## 🔹 **Complexity Analysis**
+| **Operation** | **Time Complexity** |
+|--------------|--------------------|
+| **Looping through array** | `O(n)` |
+| **Total Complexity** | **O(n) (Efficient)** |
+
+✅ **Best Possible Complexity!** 🚀  
+
+---
+## 🔹 **Key Observations**
+1. **Why Two-Pointer Works?**
+   - Kyunki array **sorted hai**, isiliye **left se badhane ya right se kam karne ka logic efficient hai**.
+
+2. **Why Not Use HashMap?**
+   - HashMap solution **O(n) time & O(n) space** lega, lekin yeh approach **O(1) space** use karta hai.
+
+3. **Two-Pointer Technique ka Fayda**
+   - **O(n) complexity** banata hai, jo **O(n²) brute force se bahut fast hai**.
+
+4. **Interview Me Explain Karne Ka Best Tareeka**
+   - **Dry run** aur **text diagram** ke saath explain karo.
+   - **Jab sum chhota ho toh left badhane ka reason batao.**
+   - **Jab sum bada ho toh right kam karne ka reason batao.**
+
+---
+
+## 🔹 **Alternative Approaches**
+| **Approach** | **Time Complexity** | **Space Complexity** | **Notes** |
+|-------------|--------------------|--------------------|------------|
+| **Brute Force (Nested Loops)** | `O(n²)` | `O(1)` | Too slow |
+| **HashMap Approach** | `O(n)` | `O(n)` | Extra space use karta hai |
+| **Two-Pointer Approach** | `O(n)` | `O(1)` | ✅ Best Approach |
+
+---
+
+## 🔹 **FAQs**
+### ❓ **Q1: Kya Brute Force Approach chalega?**
+⛔ **Nahi**, kyunki `O(n²)` **TLE dega jab `n` bada hoga**.
+
+### ❓ **Q2: Kya HashMap Approach better hai?**
+✅ **Nahi**, kyunki `O(n)` space use karega, jabki Two-Pointer `O(1)` space me ho raha hai.
+
+### ❓ **Q3: Kya har case me Two-Pointer best hai?**
+✅ **Haan**, **lekin array sorted hona chahiye**, warna **binary search ya hashmap better ho sakta hai**.
+
+---
+
+## 🔹 **Final Summary**
+✅ **Optimal Two-Pointer Approach (O(n))**  
+✅ **Left ya Right pointer adjust karna zaroori**  
+✅ **Dry-run aur text diagram se interview me explain karna zaroori**  
+✅ **Best solution for "Two Sum II" problem!** 🚀  
 
 💡 **Ye approach aapko interviews me edge degi!** 🔥

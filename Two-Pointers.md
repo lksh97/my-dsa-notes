@@ -614,20 +614,20 @@ class Solution {
 
             // Agar leftMax chhota hai rightMax se, toh left side process karenge
             if (leftMax < rightMax) {  
-                leftPtr++;  // Left pointer aage badhao
+                leftPtr++;  // Left pointer aage badhao (taaki iss naye index par trapped water check ho sake)
 
                 // leftMax update karo agar naye height[leftPtr] se bada ho
-                leftMax = Math.max(leftMax, height[leftPtr]);
+                leftMax = Math.max(leftMax, height[leftPtr]); // curr index tak leftMax
 
                 // Water trap hone ka formula: leftMax - current height
                 // Agar leftMax > height[leftPtr] toh pani trap hoga, otherwise 0 add hoga
                 trappedWater += leftMax - height[leftPtr];  
 
             } else {  // Agar rightMax chhota ya equal hai, toh right side process karenge
-                rightPtr--;  // Right pointer ko peeche le jao
+                rightPtr--;  // Right pointer ko peeche le jao (taaki iss naye index par trapped water check ho sake)
 
                 // rightMax update karo agar naye height[rightPtr] se bada ho
-                rightMax = Math.max(rightMax, height[rightPtr]);
+                rightMax = Math.max(rightMax, height[rightPtr]); // curr index tak rightMax
 
                 // Water trap hone ka formula: rightMax - current height
                 // Agar rightMax > height[rightPtr] toh pani trap hoga, otherwise 0 add hoga

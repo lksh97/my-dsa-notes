@@ -351,3 +351,167 @@ nums = [-1, 0, 1, 2, -1, -4]
 ✅ **O(n²) time complexity (efficient)**  
 ✅ **Interview-friendly & dry-run explanation**  
 💡 **Best Approach for 3Sum Interview Problem** 🚀
+
+
+----
+
+### 📌 Problem 3: **Container With Most Water - Interview Preparation (Hinglish + Dry Run + Text Diagrams)**
+
+---
+## 🔹 **Problem Samajhne Ka Tarika**
+Hume ek **integer array `height[]`** diya hai, jo **vertical lines** ko represent karta hai. Hume **maximum area** nikalna hai jo **paani store** kar sakta hai, considering:
+
+1. **Width** = Distance between two selected lines.
+2. **Height** = Minimum of the two selected lines.
+
+**Formula for Area:**
+\[
+\text{Area} = \text{min(height[left], height[right])} \times (\text{right} - \text{left})
+\]
+
+### **Example**
+📌 **Input:**  
+```java
+height = [1,8,6,2,5,4,8,3,7]
+```
+📌 **Output:**  
+```
+49
+```
+
+📌 **Explanation:**  
+The **maximum water area** is formed between `height[1] = 8` and `height[8] = 7`, giving area:
+
+\[
+\text{min}(8,7) \times (8-1) = 7 \times 7 = 49
+\]
+
+---
+## 🔹 **Brute Force Approach 🐢 (TLE Hoga!)**
+Sab possible pairs ko check karna, **O(n²) complexity** me chalega.
+
+```java
+public int maxArea(int[] height) {
+    int maxarea = 0;
+    for(int i = 0; i < height.length; i++) {
+        for(int j = i + 1; j < height.length; j++) {
+            int area = Math.min(height[i], height[j]) * (j - i);
+            maxarea = Math.max(maxarea, area);
+        }
+    }
+    return maxarea;
+}
+```
+⛔ **Problem**: **TLE hoga** jab `n` bada hoga (max `10^5` tak ja sakta hai).
+
+---
+## 🔹 **Optimized Approach - Two Pointers 🚀**
+**Strategy:**
+1. **Left aur Right Pointer Lo:** Ek `left = 0` aur ek `right = n-1` par rakho.
+2. **Calculate Area:** `Math.min(height[left], height[right]) * (right - left)`.
+3. **Pointer Move Karo:**
+   - **Jis line ki height chhoti ho** → usko move karo (`left++` ya `right--`).
+   - **Agar equal ho toh dono ko move kar sakte hain**.
+4. **Maximum Area Track Karo.**
+
+---
+## 🔹 **Code Implementation**
+```java
+public class Solution {
+    public int maxArea(int[] height) {
+        int maxarea = 0;
+        int left = 0;
+        int right = height.length - 1;
+
+        while (left < right) {
+            int width = right - left;
+            maxarea = Math.max(
+                maxarea,
+                Math.min(height[left], height[right]) * width
+            );
+
+            if (height[left] <= height[right]) {
+                left++;  // Move left pointer
+            } else {
+                right--; // Move right pointer
+            }
+        }
+        return maxarea;
+    }
+}
+```
+
+---
+## 🔹 **Dry Run - Step-by-Step Execution**
+📌 **Input:**  
+```java
+height = [1, 8, 6, 2, 5, 4, 8, 3, 7]
+```
+📌 **Initialization:**  
+```
+left = 0, right = 8, maxarea = 0
+```
+
+| **Step** | **left** | **right** | **height[left]** | **height[right]** | **Width** | **Min Height** | **Area** | **Max Area** | **Move Pointer** |
+|---------|---------|--------|------------|------------|--------|------------|------|------|--------------|
+| 1 | 0 | 8 | 1 | 7 | 8 | 1 | 8 | 8 | left++ |
+| 2 | 1 | 8 | 8 | 7 | 7 | 7 | 49 | 49 | right-- |
+| 3 | 1 | 7 | 8 | 3 | 6 | 3 | 18 | 49 | right-- |
+| 4 | 1 | 6 | 8 | 8 | 5 | 8 | 40 | 49 | right-- |
+| 5 | 1 | 5 | 8 | 4 | 4 | 4 | 16 | 49 | right-- |
+| 6 | 1 | 4 | 8 | 5 | 3 | 5 | 15 | 49 | right-- |
+| 7 | 1 | 3 | 8 | 2 | 2 | 2 | 4 | 49 | right-- |
+| 8 | 1 | 2 | 8 | 6 | 1 | 6 | 6 | 49 | right-- |
+
+✅ **Final Answer:** `maxarea = 49`
+
+---
+## 🔹 **Complexity Analysis**
+| **Operation** | **Time Complexity** |
+|--------------|--------------------|
+| **Looping through array** | `O(n)` |
+| **Total Complexity** | **O(n) (Efficient)** |
+
+✅ **Best Possible Complexity!** 🚀
+
+---
+## 🔹 **Key Observations**
+1. **Why Move the Shorter Line?**
+   - **Shorter height constraint hota hai**, isiliye usko move karke naye heights explore karte hain.
+   - Agar **badi height move karein**, toh width toh chhoti ho jayegi, lekin height wahi rahegi ya aur chhoti ho sakti hai.
+
+2. **Two-Pointer Technique ka Fayda**
+   - **O(n) complexity** banata hai, jo **O(n²)** brute force se **bahut fast hai**.
+
+3. **Dry Run Important Hai**
+   - Interview me **examples aur text diagrams** ke saath **step-by-step dry run** explain karna zaroori hota hai.
+
+---
+## 🔹 **Alternative Approaches**
+| **Approach** | **Time Complexity** | **Space Complexity** | **Notes** |
+|-------------|--------------------|--------------------|------------|
+| **Brute Force (Nested Loops)** | `O(n²)` | `O(1)` | Too slow |
+| **Sorting + Binary Search** | `O(n log n)` | `O(1)` | Not possible since array is unordered |
+| **Two-Pointer Approach** | `O(n)` | `O(1)` | ✅ Best Approach |
+
+---
+## 🔹 **FAQs**
+### ❓ **Q1: Kya Brute Force Approach chalega?**
+⛔ **Nahi**, kyunki `O(n²)` **TLE dega jab `n` bada hoga**.
+
+### ❓ **Q2: Kya Binary Search Approach kaam karegi?**
+⛔ **Nahi**, kyunki heights **unordered hain**, aur `O(n log n)` approach kaam nahi karegi.
+
+### ❓ **Q3: Kya har case me Two-Pointer best hai?**
+✅ **Haan**, kyunki **left-right adjust** karke **sabse bada area dhundh rahe hain** efficiently.
+
+---
+## 🔹 **Final Summary**
+✅ **Optimal Two-Pointer Approach (O(n))**  
+✅ **Always move the smaller height pointer**  
+✅ **Dry-run aur text diagram se interview me explain karna zaroori**  
+✅ **Best solution for "Container With Most Water" problem!** 🚀  
+
+💡 **Ye approach aapko interviews me edge degi!** 🔥
+
+----

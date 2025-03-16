@@ -515,3 +515,226 @@ left = 0, right = 8, maxarea = 0
 💡 **Ye approach aapko interviews me edge degi!** 🔥
 
 ----
+
+### 📌 Problem 4: **Trapping Rain Water - Interview Preparation (Hinglish + Dry Run + Text Diagrams)**  
+
+---
+
+## 🔹 **Problem Samajhne Ka Tarika**
+Hume ek **integer array `height[]`** diya hai jo **bars ka height** represent karta hai. Hume ye batana hai ki **kitna water trap ho sakta hai** bars ke beech me.
+
+💡 **Water tabhi trap ho sakta hai jab left aur right dono taraf ek bada wall ho!**  
+💡 **Formula:**  
+\[
+\text{Water at index i} = \min(\text{max height on left}, \text{max height on right}) - \text{height}[i]
+\]
+🔹 Agar `min(leftMax, rightMax) > height[i]`, tabhi water store hoga.  
+🔹 Otherwise, water `0` store hoga.
+
+---
+## 🔹 **Example & Image Explanation**  
+📌 **Example Input:**  
+```java
+height = [3, 0, 2, 0, 4]
+```
+📌 **Visual Representation:**  
+
+<img width="199" alt="trapping-rain-water" src="https://github.com/user-attachments/assets/2729d242-1228-458f-bfbd-1a195dc2a5e0" />
+
+
+🔹 **Water stored at index 1:** `min(2,3) - 0 = 2`  
+🔹 **Water stored at index 2:** `min(2,3) - 1 = 1`  
+🔹 **Water stored at index 3:** `min(2,3) - 0 = 2`  
+🔹 **Total water trapped:** `2 + 1 + 2 = 5`
+
+📌 **Image Explanation (Uploaded Image)**
+- Blue shaded area **represents trapped water**.
+- Red numbers **show water units trapped at each index**.
+- Left & right walls **act as boundaries** for trapped water.
+
+---
+## 🔹 **Brute Force Approach 🐢 (TLE Hoga!)**
+Har element ke liye **uske left aur right max height** dhoondho, fir min nikal ke formula lagao.
+
+```java
+public int trap(int[] height) {
+    int n = height.length;
+    int totalWater = 0;
+
+    for (int i = 0; i < n; i++) {
+        int leftMax = 0, rightMax = 0;
+        for (int j = i; j >= 0; j--) {
+            leftMax = Math.max(leftMax, height[j]);
+        }
+        for (int j = i; j < n; j++) {
+            rightMax = Math.max(rightMax, height[j]);
+        }
+        totalWater += Math.min(leftMax, rightMax) - height[i];
+    }
+    return totalWater;
+}
+```
+⛔ **Complexity:** `O(n²)` → **Bahut slow!**  
+⛔ **Problem:** Har element ke liye left aur right max baar baar calculate ho raha hai.
+
+---
+## 🔹 **Optimized Approach - Two Pointers 🚀**
+**Strategy:**
+1. **Left aur Right Pointer Lo:** `left = 0` aur `right = n-1`.
+2. **`leftMax` aur `rightMax` Track Karo.**
+3. **Chhoti wall ka pointer move karo**:
+   - Agar **leftMax chhota hai**, toh left se water trap hoga → `left++`
+   - Agar **rightMax chhota hai**, toh right se water trap hoga → `right--`
+4. **Jab pointers cross ho jaye, loop stop.**
+
+---
+## 🔹 **Code Implementation**
+```java
+class Solution {
+    public int trap(int[] height) {
+
+        // Agar height array empty hai ya sirf ek ya do elements hain, toh paani store nahi ho sakta
+        if (height == null || height.length < 3) return 0;
+
+        // Do pointers define karte hain - ek left se start karega, ek right se
+
+        // no water is trapped at the corner indexes (that's why neechche pehle leftPtr++ and rightPtr-- hota hai kyunki end indexes par water hoga hi nahi. bas wall hogi)
+        int leftPtr = 0;
+        int rightPtr = height.length - 1;
+
+        // leftMax aur rightMax ka use karenge taaki left aur right side ka maximum height track kar sakein
+        int leftMax = height[leftPtr];  
+        int rightMax = height[rightPtr];
+
+        // Yeh variable total trapped water store karega
+        int trappedWater = 0;
+
+        // Jab tak left pointer right pointer se chhota hai, tab tak loop chalega
+        while (leftPtr < rightPtr) {
+
+            // Agar leftMax chhota hai rightMax se, toh left side process karenge
+            if (leftMax < rightMax) {  
+                leftPtr++;  // Left pointer aage badhao
+
+                // leftMax update karo agar naye height[leftPtr] se bada ho
+                leftMax = Math.max(leftMax, height[leftPtr]);
+
+                // Water trap hone ka formula: leftMax - current height
+                // Agar leftMax > height[leftPtr] toh pani trap hoga, otherwise 0 add hoga
+                trappedWater += leftMax - height[leftPtr];  
+
+            } else {  // Agar rightMax chhota ya equal hai, toh right side process karenge
+                rightPtr--;  // Right pointer ko peeche le jao
+
+                // rightMax update karo agar naye height[rightPtr] se bada ho
+                rightMax = Math.max(rightMax, height[rightPtr]);
+
+                // Water trap hone ka formula: rightMax - current height
+                // Agar rightMax > height[rightPtr] toh pani trap hoga, otherwise 0 add hoga
+                trappedWater += rightMax - height[rightPtr];  
+            }
+        }
+
+        // Total trapped water return karenge
+        return trappedWater;
+    }
+}
+```
+
+---
+## 🔹 **Dry Run - Step-by-Step Execution**
+📌 **Input:**  
+```java
+height = [3, 0, 2, 0, 4]
+```
+📌 **Initialization:**  
+```
+leftPtr = 0, rightPtr = 4
+leftMax = 3, rightMax = 4
+trappedWater = 0
+```
+
+| **Step** | **leftPtr** | **rightPtr** | **leftMax** | **rightMax** | **Trapped Water** |
+|---------|------------|-------------|------------|-------------|----------------|
+| 1 | 1 | 4 | 3 | 4 | `3 - 0 = 3` |
+| 2 | 2 | 4 | 3 | 4 | `3 - 2 = 1` |
+| 3 | 3 | 4 | 3 | 4 | `3 - 0 = 3` |
+| 4 | 4 | 4 | 4 | 4 | `0` (Loop ends) |
+
+✅ **Final Answer:** `7`
+
+---
+## 🔹 **Complexity Analysis**
+| **Operation** | **Time Complexity** |
+|--------------|--------------------|
+| **Looping through array** | `O(n)` |
+| **Total Complexity** | **O(n) (Efficient)** |
+
+✅ **Best Possible Complexity!** 🚀
+
+---
+## 🔹 **Key Observations**
+1. **Why Move the Shorter Wall?**
+   - **Water trap hone ka limit chhoti wall decide karti hai.**
+   - **Badi wall move karne se koi fayda nahi hoga.**
+
+2. **Two-Pointer Technique ka Fayda**
+   - **O(n) complexity** banata hai, jo **O(n²) brute force se fast hai**.
+
+3. **Dry Run aur Diagram se Interview me Explain Karna Zaroori**
+   - **Step-by-step execution batana padta hai**.
+---
+
+## 🔹 **Quick Recap (Based on Code)**
+1. **Two Pointers Approach** 🏃‍♂️🏃‍♀️  
+   - Ek pointer `left` se aur dusra `right` se.
+   - Chhoti boundary ka pointer move karte hain.
+
+2. **LeftMax & RightMax** 📏  
+   - Har index pe max left aur max right height track karte hain.
+
+3. **Water Calculation Formula** 🌊  
+   - `water = min(leftMax, rightMax) - height[i]`
+   - Agar **leftMax chhota ho** → left pointer move hoga.
+   - Agar **rightMax chhota ho** → right pointer move hoga.
+
+4. **Time Complexity: `O(n)`** ⏳  
+   - Ek baar pura array traverse hota hai → **Linear Time**.
+
+5. **Space Complexity: `O(1)`** 💾  
+   - Sirf variables use ho rahe hain, **no extra space**.
+
+---
+
+## 🔹 **Revision ke liye 2 min Cheat Sheet**
+| **Step** | **Condition** | **Action** |
+|---------|-------------|----------|
+| `leftMax < rightMax` | `leftPtr++` | `leftMax update karo, trapped water add karo` |
+| `rightMax <= leftMax` | `rightPtr--` | `rightMax update karo, trapped water add karo` |
+---
+## 🔹 **Alternative Approaches**
+| **Approach** | **Time Complexity** | **Space Complexity** | **Notes** |
+|-------------|--------------------|--------------------|------------|
+| **Brute Force (Nested Loops)** | `O(n²)` | `O(1)` | Too slow |
+| **Prefix + Suffix Array** | `O(n)` | `O(n)` | Uses extra space |
+| **Two-Pointer Approach** | `O(n)` | `O(1)` | ✅ Best Approach |
+
+---
+## 🔹 **FAQs**
+### ❓ **Q1: Kya Brute Force Approach chalega?**
+⛔ **Nahi**, kyunki `O(n²)` **TLE dega jab `n` bada hoga**.
+
+### ❓ **Q2: Kya Prefix-Suffix Array Approach theek hai?**
+✅ **Haan**, lekin `O(n)` extra space leta hai jo **Two-Pointer se bach sakta hai**.
+
+### ❓ **Q3: Kya har case me Two-Pointer best hai?**
+✅ **Haan**, kyunki left aur right pointers adjust karke efficiently **paani store hone ka maximum area find karte hain**.
+
+---
+## 🔹 **Final Summary**
+✅ **Optimal Two-Pointer Approach (O(n))**  
+✅ **Always move the smaller height pointer**  
+✅ **Dry-run aur text diagram se interview me explain karna zaroori**  
+✅ **Best solution for "Trapping Rain Water" problem!** 🚀  
+
+💡 **Ye approach aapko interviews me edge degi!** 🔥

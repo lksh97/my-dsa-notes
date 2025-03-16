@@ -420,8 +420,213 @@ left = 0, sum = 0, minLength = ∞
 
 ## 🔹 **Final Summary**
 ✅ **Optimal Sliding Window Approach (O(n))**  
+
+---
+
+### 📌 Problem 2: **Longest Substring Without Repeating Characters - Interview Preparation (Hinglish Explanation + Dry Run + Text Diagrams)**  
+
+---
+
+## 🔹 **Problem Samajhne Ka Tarika**
+Hume ek **string `s`** di gayi hai, aur hume **sabse lambi substring ka length return karna hai jisme koi character repeat na ho**.
+
+💡 **Constraints:**
+- **Substring continuous honi chahiye.**
+- **String me sirf lowercase English letters ho sakte hain.**
+- **Optimized tarika dhoondhna hai, brute-force nahi chalega!**
+
+---
+
+## 🔹 **Example & Text Diagram**  
+📌 **Example 1:**  
+```java
+Input: s = "abcabcbb"
+Output: 3
+```
+📌 **Explanation:**  
+**"abc"** ek **longest substring** hai **jisme koi character repeat nahi ho raha**.  
+
+💡 **Text Diagram (Sliding Window Concept)**:
+```
+Index:   0   1   2   3   4   5   6   7  
+Chars:   a   b   c   a   b   c   b   b  
+         ↑   ↑   ↑     
+      (start)   
+      (end) → Expand  
+```
+- **Jab tak koi duplicate nahi mile, end pointer badhao.**
+- **Jab duplicate mile, start pointer aage badhakar window adjust karo.**
+- **Har step pe max length track karte jao.**
+
+---
+
+## 🔹 **Brute Force Approach 🐢 (TLE Hoga!)**
+Har substring check karna (`O(n²)` complexity).
+
+```java
+public int lengthOfLongestSubstring(String s) {
+    int maxLength = 0;
+    
+    for (int i = 0; i < s.length(); i++) {
+        Set<Character> set = new HashSet<>();
+        for (int j = i; j < s.length(); j++) {
+            if (set.contains(s.charAt(j))) {
+                break;
+            }
+            set.add(s.charAt(j));
+            maxLength = Math.max(maxLength, j - i + 1);
+        }
+    }
+    
+    return maxLength;
+}
+```
+⛔ **Problem:** **O(n²) complexity**, bahut slow for large `n` (max `10^5`).
+
+---
+
+## 🔹 **Optimized Approach - Sliding Window 🚀**
+**Strategy:**
+1. **Left aur Right Pointers Lo:** `start = 0`, `end = 0`
+2. **Expand Window Jab Tak Koi Duplicate Na Mile**  
+3. **Jab Duplicate Mile:**  
+   - **Start Pointer Move Karo (Window Shrink Karo)**  
+   - **HashMap Use Karke Character Ke Last Index Ko Track Karo**  
+4. **Har Step Pe Max Length Update Karo**
+
+---
+
+## 🔹 **Code Implementation with Hinglish Comments**
+```java
+import java.util.*;
+
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        
+        // Har character ka last seen index track karne ke liye HashMap use kar rahe hain
+        Map<Character, Integer> map = new HashMap<>();
+
+        // Yeh variable sabse lambi substring ka length store karega
+        int maxLength = 0;
+
+        // Yeh pointer current substring ka start track karega
+        int start = 0;
+
+        // Right pointer loop chalayega (Sliding Window ka right end)
+        for (int end = 0; end < s.length(); end++) {
+            char c = s.charAt(end); // Current character uthao
+
+            /*
+             - **Agar character pehle aaya hai, toh start ko update karo:**
+               - `start = map.get(c) + 1`
+               - Iska matlab hai ki ab window ka naya start wo hoga jo pichle repeated character ke just baad hai.
+               - `Math.max(start, map.get(c) + 1)` ka use isliye kiya hai kyunki start kabhi piche nahi jaana chahiye.
+            */
+            if (map.containsKey(c)) {
+                start = Math.max(map.get(c) + 1, start);
+            }
+
+            // Current character ka index store karo
+            map.put(c, end);
+
+            // Maximum substring length update karo
+            maxLength = Math.max(maxLength, end - start + 1);
+        }
+
+        // Final max length return karo
+        return maxLength;
+    }
+}
+```
+
+---
+
+## 🔹 **Dry Run - Step-by-Step Execution**
+📌 **Input:**  
+```java
+s = "abcabcbb"
+```
+📌 **Initialization:**  
+```
+start = 0, maxLength = 0
+```
+
+| **Step** | **end** | **s[end]** | **Map (char → index)** | **start** | **maxLength** | **Action** |
+|---------|--------|---------|----------------|------|------|-------------|
+| 1 | 0 | 'a' | `{a → 0}` | 0 | 1 | Expand |
+| 2 | 1 | 'b' | `{a → 0, b → 1}` | 0 | 2 | Expand |
+| 3 | 2 | 'c' | `{a → 0, b → 1, c → 2}` | 0 | 3 | Expand |
+| 4 | 3 | 'a' | `{a → 3, b → 1, c → 2}` | 1 | 3 | Start Moved |
+| 5 | 4 | 'b' | `{a → 3, b → 4, c → 2}` | 2 | 3 | Start Moved |
+| 6 | 5 | 'c' | `{a → 3, b → 4, c → 5}` | 3 | 3 | Start Moved |
+| 7 | 6 | 'b' | `{a → 3, b → 6, c → 5}` | 5 | 3 | Start Moved |
+| 8 | 7 | 'b' | `{a → 3, b → 7, c → 5}` | 7 | 3 | Start Moved |
+
+✅ **Final Answer:** `3` (Substring "abc")
+
+---
+
+## 🔹 **Complexity Analysis**
+| **Operation** | **Time Complexity** |
+|--------------|--------------------|
+| **Looping through string** | `O(n)` |
+| **Total Complexity** | **O(n) (Efficient)** |
+
+✅ **Best Possible Complexity!** 🚀  
+
+---
+## 🔹 **Key Observations**
+1. **Why Sliding Window Works?**
+   - **Jab tak duplicate nahi mile, right pointer badhao (Expand Window).**
+   - **Jab duplicate mile, start pointer aage badhakar window adjust karo.**
+   - **Max length ko track karte raho.**
+
+2. **Why Not Use Brute Force?**
+   - **Brute force `O(n²)` slow hoga, jabki sliding window `O(n)` fast hai.**
+
+3. **HashMap Ka Kya Role Hai?**
+   - **Har character ka last seen index store karne ke liye use ho raha hai.**
+   - **Jab duplicate mile, uske last index ka use karke `start` adjust kar rahe hain.**
+
+4. **Interview Me Explain Karne Ka Best Tareeka**
+   - **Dry run** aur **text diagram** ke saath explain karo.
+   - **Sliding Window ka concept acche se batao.**
+   - **Duplicate mile toh start pointer adjust hone ka logic samjhao.**
+
+---
+
+## 🔹 **Alternative Approaches**
+| **Approach** | **Time Complexity** | **Space Complexity** | **Notes** |
+|-------------|--------------------|--------------------|------------|
+| **Brute Force (Nested Loops)** | `O(n²)` | `O(1)` | Too slow |
+| **Sliding Window + HashSet** | `O(n)` | `O(26) = O(1)` | Less efficient than HashMap |
+| **Sliding Window + HashMap** | `O(n)` | `O(min(m, n))` | ✅ Best Approach |
+
+---
+
+## 🔹 **FAQs**
+### ❓ **Q1: Kya Brute Force Approach chalega?**
+⛔ **Nahi**, kyunki `O(n²)` **TLE dega jab `n` bada hoga**.
+
+### ❓ **Q2: Kya HashSet use kar sakte hain?**
+✅ **Haan**, lekin HashMap se efficient nahi hoga jab start adjust karna pade.
+
+### ❓ **Q3: Kya har case me Sliding Window best hai?**
+✅ **Haan**, **kyunki ye `O(n)` me optimal hai.**
+
+---
+
+## 🔹 **Final Summary**
+✅ **Optimal Sliding Window Approach (O(n))**  
+✅ **Expand Window, Shrink When Duplicate Found**  
+✅ **Dry-run aur text diagram se interview me explain karna zaroori**  
+✅ **Best solution for "Longest Substring Without Repeating Characters" problem!** 🚀  
+
+💡 **Ye approach aapko interviews me edge degi!** 🔥
 ✅ **Expand Window, Shrink When Sum ≥ Target**  
 ✅ **Dry-run aur text diagram se interview me explain karna zaroori**  
-✅ **Best solution for "Minimum Size Subarray Sum" problem!** 🚀  
+✅ **Best solution for "Minimum Size Subarray Sum" problem!** 🚀
+
+---
 
 💡 **Ye approach aapko interviews me edge degi!** 🔥

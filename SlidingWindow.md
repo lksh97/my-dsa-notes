@@ -629,4 +629,371 @@ start = 0, maxLength = 0
 
 ---
 
+## 🔹 Problem 3:  **Longest Repeating Character Replacement (Hinglish Explanation + Dry Run + Text Diagrams)**  
+
+## 🔹 **Problem Samajhne Ka Tarika**
+Hume ek **string `s`** di gayi hai aur ek **integer `k`**, jo **maximum allowed replacements** ko represent karta hai.  
+
+💡 **Hume longest substring ki length return karni hai jisme hum at most `k` characters replace karke sab characters same bana sakein.**  
+
+📌 **Constraints:**
+- **String sirf uppercase English letters (`A-Z`) ka bana hoga.**
+- **Optimized solution `O(n)` complexity me likhna hai.**
+
+---
+
+## 🔹 **Example & Text Diagram**  
+📌 **Example 1:**  
+```java
+Input: s = "AABABBA", k = 1
+Output: 4
+```
+📌 **Explanation:**  
+Hum **at most `k=1` character replace kar sakte hain**.  
+**Longest substring jo valid ban sakti hai: `"AABA"` ya `"ABBB"` (length = 4).**  
+
+💡 **Text Diagram (Sliding Window Concept)**:
+```
+Index:   0   1   2   3   4   5   6  
+Chars:   A   A   B   A   B   B   A  
+         ↑                   ↑  
+      (left)               (right)   
+    Window Size: 4 (Valid Window)
+```
+✅ **Step 1:** Expand jab tak `k` replacements possible hain.  
+❌ **Step 2:** Jab `window size - max frequency > k`, `left` pointer badhake shrink karo.  
+✅ **Step 3:** Har step pe max window length track karte jao.  
+
+---
+
+## 🔹 **Theory Behind Solution (Sliding Window)**
+💡 **Key Observations:**
+1️⃣ **Ek `window` define karte hain jo dynamically expand aur contract hoti hai.**  
+2️⃣ **Har window ke andar `maxFrequency` track karte hain, jo sabse frequent character ka count hota hai.**  
+3️⃣ **Agar `window size - maxFrequency > k` ho jaye, toh `left` pointer ko move karke window ko shrink karte hain.**  
+4️⃣ **Har valid window ke liye max length track karte hain.**  
+
+📌 **Formula:**  
+\[
+\text{Characters to Replace} = \text{Window Size} - \text{Max Frequency}
+\]
+
+🔹 **Agar `Characters to Replace <= k`, toh window valid hai, expand karo.**  
+🔹 **Agar `Characters to Replace > k`, toh `left` pointer badhakar window shrink karo.**  
+
+---
+
+## 🔹 **Optimized Approach - Sliding Window 🚀**
+**Strategy:**
+1. **Left aur Right Pointers Lo:** `left = 0`, `right = 0`
+2. **Expand Window Jab Tak `k` Replacement Possible Ho**
+3. **Jab Replacement Limit Cross Ho Jaye:**  
+   - **`left` Pointer Move Karo (Window Shrink Karo)**
+4. **Har Step Pe Max Length Update Karo**
+
+---
+
+## 🔹 **Code Implementation with Hinglish Comments**
+```java
+import java.util.*;
+
+class Solution {
+    public int characterReplacement(String s, int k) {
+
+        // Frequency array to store character counts (A-Z → 26 letters)
+        int[] frequency = new int[26];
+
+        // `left` pointer sliding window ka starting index track karega
+        int left = 0;
+
+        // Maximum valid window ka length track karega
+        int maxLength = 0;
+
+        // Current window me sabse zyada baar aane wale character ka frequency track karega
+        int maxFrequency = 0;
+
+        // `right` pointer loop chalayega (Sliding Window ka right end)
+        for (int right = 0; right < s.length(); right++) {
+            // Current character uthao aur uska frequency badhao
+            char currentChar = s.charAt(right);
+            frequency[currentChar - 'A']++;
+
+            // `maxFrequency` update karo
+            maxFrequency = Math.max(maxFrequency, frequency[currentChar - 'A']);
+
+            /*
+             - **Agar window valid nahi rahi toh shrink karo**:
+               - `(right - left + 1) - maxFrequency > k` ka matlab hai ki
+                 `window size - max repeating char > k`, toh hume window chhoti karni padegi.
+             */
+            if ((right - left + 1) - maxFrequency > k) {
+                char leftChar = s.charAt(left);
+                frequency[leftChar - 'A']--; // Leftmost character remove karo
+                left++; // `left` pointer aage badhake window shrink karo
+            }
+
+            // Max valid window length update karo
+            maxLength = Math.max(maxLength, right - left + 1);
+        }
+
+        // Maximum length return karo
+        return maxLength;
+    }
+}
+```
+
+---
+
+## 🔹 **Dry Run - Step-by-Step Execution**
+📌 **Input:**  
+```java
+s = "AABABBA", k = 1
+```
+📌 **Initialization:**  
+```
+left = 0, maxLength = 0, maxFrequency = 0
+```
+
+| **Step** | **right** | **s[right]** | **frequency[]** | **maxFrequency** | **Window Size** | **Condition (Valid?)** | **Action** |
+|---------|--------|---------|----------------|------|------|-----------------|-------------|
+| 1 | 0 | 'A' | `{A → 1}` | 1 | 1 | ✅ `1-1 ≤ 1` | Expand |
+| 2 | 1 | 'A' | `{A → 2}` | 2 | 2 | ✅ `2-2 ≤ 1` | Expand |
+| 3 | 2 | 'B' | `{A → 2, B → 1}` | 2 | 3 | ✅ `3-2 ≤ 1` | Expand |
+| 4 | 3 | 'A' | `{A → 3, B → 1}` | 3 | 4 | ✅ `4-3 ≤ 1` | Expand |
+| 5 | 4 | 'B' | `{A → 3, B → 2}` | 3 | 5 | ❌ `5-3 > 1` | Shrink |
+| 6 | 5 | 'B' | `{A → 2, B → 3}` | 3 | 4 | ✅ `4-3 ≤ 1` | Expand |
+| 7 | 6 | 'A' | `{A → 3, B → 3}` | 3 | 4 | ✅ `4-3 ≤ 1` | Expand |
+
+✅ **Final Answer:** `4` (Substring `"AABA"` or `"ABBB"`)
+
+---
+
+## 🔹 **Complexity Analysis**
+| **Operation** | **Time Complexity** |
+|--------------|--------------------|
+| **Looping through string** | `O(n)` |
+| **Total Complexity** | **O(n) (Efficient)** |
+
+✅ **Best Possible Complexity!** 🚀  
+
+---
+## 🔹 **Key Observations**
+1. **Why Sliding Window Works?**
+   - **Expand window jab tak possible ho.**
+   - **Jab window invalid ho jaye (`window size - maxFrequency > k`), left pointer ko move karke shrink karo.**
+   - **Har step pe max valid window length track karo.**
+
+2. **Why Not Use Brute Force?**
+   - **Brute force `O(n²)` slow hoga, jabki sliding window `O(n)` fast hai.**
+
+3. **Frequency Array Ka Role?**
+   - **Sab characters ke count ko track karna.**
+   - **Jab duplicate aaye, toh `left` pointer adjust karna.**
+
+4. **Interview Me Answer Kaise Dena Hai?**
+   - **Sliding Window ka concept diagram ke saath samjhao.**
+   - **Brute force approach bhi batao aur fir optimize karo.**
+   - **Formula (`Window Size - Max Frequency > k`) explain karo.**
+
+---
+
+## 🔹 **Alternative Approaches**
+| **Approach** | **Time Complexity** | **Space Complexity** | **Notes** |
+|-------------|--------------------|--------------------|------------|
+| **Brute Force (Nested Loops)** | `O(n²)` | `O(1)` | Too slow |
+| **Sliding Window + HashMap** | `O(n)` | `O(1)` | ✅ Best Approach |
+
+---
+
+## 🔹 **Final Summary**
+✅ **Optimal Sliding Window Approach (O(n))**  
+✅ **Expand Window, Shrink When Invalid (`Window Size - MaxFrequency > k`)**  
+✅ **Dry-run aur text diagram se interview me explain karna zaroori**  
+✅ **Best solution for "Character Replacement" problem!** 🚀  
+
 💡 **Ye approach aapko interviews me edge degi!** 🔥
+
+---
+
+# 📌 **Problem 4: Minimum Window Substring (Hinglish Explanation + Text Diagram + Dry Run + Hinglish Comments in Code)** 🚀  
+
+---
+
+## 🔹 **Problem Samajhne Ka Tarika**
+Hume **do strings `s` (source) aur `t` (target)** diye gaye hain.  
+Hume **`s` ke andar ka sabse chhota substring dhoondhna hai jo `t` ke sare characters (including frequency) contain kare**.  
+
+💡 **Constraints:**
+- **Agar aisa koi substring nahi mila toh `""` return karna hai.**
+- **`s` aur `t` sirf lowercase English letters ho sakte hain.**
+- **Optimized solution likhna hai (`O(n)`).**
+
+---
+
+## 🔹 **Example & Text Diagram**  
+📌 **Example 1:**  
+```java
+Input: s = "ADOBECODEBANC", t = "ABC"
+Output: "BANC"
+```
+📌 **Explanation:**  
+✅ `"BANC"` sabse **chhota substring hai jo `ABC` ke sare characters contain karta hai**.  
+
+💡 **Text Diagram (Sliding Window Concept)**:
+```
+s:    A  D  O  B  E  C  O  D  E  B  A  N  C  
+      ↑                          ↑  
+    (start)                    (end)   
+```
+✅ **Step 1:** Expand jab tak `t` ke sare characters cover ho jaaye.  
+❌ **Step 2:** Jab sare characters aa jayein, `start` pointer badhakar window chhoti karo.  
+✅ **Step 3:** Har valid window ka `min_length` track karte jao.  
+
+---
+
+## 🔹 **Theory Behind Solution (Sliding Window)**
+💡 **Key Observations:**
+1️⃣ **Ek `window` define karte hain jo dynamically expand aur contract hoti hai.**  
+2️⃣ **Har window ke andar `count` track karte hain jo batata hai ki `t` ke kitne characters mil gaye hain.**  
+3️⃣ **Jab `count == t.length()` ho jaye, toh `left` pointer ko move karke window ko shrink karte hain.**  
+4️⃣ **Har valid window ke liye min length track karte hain.**  
+
+📌 **Formula:**  
+\[
+\text{Jab tak } count == t.length(), \text{ start pointer badhakar window chhoti karo.}
+\]
+
+🔹 **Agar valid window mili toh `min_length` update karo.**  
+
+---
+
+## 🔹 **Optimized Approach - Sliding Window 🚀**
+**Strategy:**
+1. **Two Frequency Arrays Lo:**  
+   - `hash_str[256]` → Source string `s` ka character frequency store karega.
+   - `hash_pat[256]` → Target string `t` ka character frequency store karega.  
+2. **Expand Window Jab Tak Sare Characters Mil Jayein (`count == t.length()`).**
+3. **Jab Sare Characters Mil Jayein:**  
+   - **`start` Pointer Move Karo (Window Shrink Karo)**
+   - **Min Length Update Karo**  
+4. **Agar `start_idx == -1` raha, toh koi valid substring nahi mila.**  
+
+---
+
+## 🔹 **Code Implementation with Hinglish Comments**
+```java
+class Solution {
+    public String minWindow(String s, String t) {
+
+        // Agar `t` ka length `s` se bada hai, toh koi valid substring ho hi nahi sakta
+        if (t.length() > s.length()) return "";
+
+        // Frequency arrays: `hash_pat` t ka frequency store karega, `hash_str` current window ka
+        int[] hash_str = new int[256]; 
+        int[] hash_pat = new int[256];
+
+        // `t` ka frequency count karo
+        for (int i = 0; i < t.length(); i++) {
+            hash_pat[t.charAt(i)]++;
+        }
+
+        // `count` track karega ki `t` ke kitne characters match ho chuke hain
+        int count = 0;
+
+        // `start` pointer sliding window ka left end track karega
+        int start = 0;
+
+        // `start_idx` store karega minimum length ka start index
+        int start_idx = -1;
+
+        // `min_length` track karega ki ab tak ka smallest valid substring length kya hai
+        int min_length = Integer.MAX_VALUE;
+
+        // `right` pointer loop chalayega (Sliding Window ka right end)
+        for (int end = 0; end < s.length(); end++) {
+            char curr = s.charAt(end); // Current character uthao
+            hash_str[curr]++; // Frequency badhao
+
+            // Agar `curr` character `t` me hai aur uska frequency valid hai, toh `count++` karo
+            if (hash_pat[curr] >= hash_str[curr]) count++;
+
+            /*
+             * Jab `count == t.length()` ho jaye, iska matlab hai ki window me `t` ke sare characters mil gaye.
+             * Ab `start` pointer ko move karke unnecessary characters hatao.
+             */
+            if (count == t.length()) {
+                while (hash_str[s.charAt(start)] > hash_pat[s.charAt(start)]) {
+                    hash_str[s.charAt(start)]--; // Extra character ka frequency ghatao
+                    start++; // Start pointer aage badhao (window shrink karo)
+                }
+
+                // Agar ye substring chhoti hai, toh `min_length` update karo
+                if (end - start + 1 < min_length) {
+                    min_length = end - start + 1;
+                    start_idx = start; // Naya start index store karo
+                }
+            }
+        }
+
+        // Agar `start_idx == -1`, iska matlab koi valid substring nahi mila
+        if (start_idx == -1) return "";
+
+        // Smallest valid substring return karo
+        return s.substring(start_idx, start_idx + min_length);
+    }
+}
+```
+
+---
+
+## 🔹 **Dry Run - Step-by-Step Execution**
+📌 **Input:**  
+```java
+s = "ADOBECODEBANC", t = "ABC"
+```
+📌 **Initialization:**  
+```
+start = 0, min_length = ∞, count = 0
+```
+
+| **Step** | **end** | **s[end]** | **hash_str** | **count** | **Valid Window?** | **Action** |
+|---------|--------|---------|----------------|------|------|-------------|
+| 1 | 0 | 'A' | `{A → 1}` | 1 | ❌ | Expand |
+| 2 | 1 | 'D' | `{A → 1, D → 1}` | 1 | ❌ | Expand |
+| 3 | 2 | 'O' | `{A → 1, D → 1, O → 1}` | 1 | ❌ | Expand |
+| 4 | 3 | 'B' | `{A → 1, D → 1, O → 1, B → 1}` | 2 | ❌ | Expand |
+| 5 | 4 | 'E' | `{A → 1, D → 1, O → 1, B → 1, E → 1}` | 2 | ❌ | Expand |
+| 6 | 5 | 'C' | `{A → 1, D → 1, O → 1, B → 1, E → 1, C → 1}` | 3 | ✅ | Shrink |
+| 7 | 6 | 'O' | `{A → 0, B → 1, C → 1, O → 1}` | 3 | ✅ | Update `min_length = 6` |
+| 8 | 10 | 'B' | `{A → 1, B → 2, C → 1}` | 3 | ✅ | Update `min_length = 4` |
+
+✅ **Final Answer:** `"BANC"`  
+
+---
+
+## 🔹 **Complexity Analysis**
+| **Operation** | **Time Complexity** |
+|--------------|--------------------|
+| **Looping through `s`** | `O(n)` |
+| **Total Complexity** | **O(n) (Efficient)** |
+
+✅ **Best Possible Complexity!** 🚀  
+
+---
+## 🔹 **Key Observations**
+1. **Why Sliding Window Works?**
+   - **Expand jab tak `t` ke sare characters mil jayein.**
+   - **Jab valid window ban jaye, start pointer badhakar shrink karo.**
+   - **Har valid window ka min length track karo.**
+
+2. **Why Not Use Brute Force?**
+   - **Brute force `O(n²)` slow hoga, jabki sliding window `O(n)` fast hai.**
+
+---
+
+## 🔹 **Final Summary**
+✅ **Optimal Sliding Window Approach (O(n))**  
+✅ **Expand Window, Shrink When Valid**  
+✅ **Best solution for "Minimum Window Substring"!** 🚀  
+
+🔥 **Ye approach aapko interviews me edge degi!** 🚀
